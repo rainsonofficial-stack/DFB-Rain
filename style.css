@@ -99,8 +99,8 @@ html, body {
 
 /* FIX: Force Save Button Vertical Thickness */
 #close-settings.close-btn {
-    height: 75px !important; 
-    min-height: 75px !important; /* Forces the height even if flex tries to shrink it */
+    height: 100px !important; 
+    min-height: 100px !important; /* Forces the height even if flex tries to shrink it */
     margin-top: 20px !important;
     flex-shrink: 0; /* Prevents the layout from squishing the button */
 }
