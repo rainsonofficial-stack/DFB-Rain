@@ -1,5 +1,5 @@
 const movieData = {
-  title: "CINEMA",
+  title: "Movies",
   forceWords: ["Inception", "The Matrix"],
   items: [
     "Jaws", "Star Wars", "Avatar", "Psycho", "Vertigo", "Rocky", "Alien", "Platoon", "Frozen", "Up",
