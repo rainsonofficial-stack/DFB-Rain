@@ -2,43 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Grid</title>
-    
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#000000">
-
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Grid">
-    <link rel="apple-touch-icon" href="icon-192.png">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Utility</title>
+    <link rel="stylesheet" href="style.css?v=3">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-    <link rel="stylesheet" href="style.css">
-
-    <style>
-        /* This ensures the gallery is ALWAYS on top and clickable at the start */
-        #gallery-overlay {
-            position: fixed;
-            inset: 0;
-            background: #000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 99999 !important; 
-            cursor: pointer;
-        }
-        #gallery-overlay img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-            pointer-events: none; /* Let the click pass through to the overlay div */
-        }
-    </style>
 </head>
 <body>
 
-    <div id="gallery-overlay">
+    <div id="gallery-overlay" class="gallery-view">
         <img src="gallery.jpg" alt="Gallery">
     </div>
 
@@ -49,23 +20,15 @@
     <div id="indicator" class="indicator"></div>
 
     <div id="settings-page" class="settings-page">
+        <div class="settings-header">SETTINGS</div>
         <div id="settings-list"></div>
-        <button class="close-btn" id="close-settings">SAVE & CLOSE</button>
+        <button id="close-settings" class="save-btn">SAVE & CLOSE</button>
     </div>
 
+    <script src="movies.js?v=3"></script>
+    <script src="cards.js?v=3"></script>
+    <script src="objects.js?v=3"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-    
-    <script src="data.js"></script> 
-    
-    <script src="app.js"></script>
-
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').catch(err => console.log(err));
-            });
-        }
-    </script>
-
+    <script src="app.js?v=3"></script>
 </body>
 </html>
