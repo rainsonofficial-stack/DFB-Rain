@@ -3,21 +3,19 @@
 body, html {
     margin: 0; padding: 0; height: 100%; width: 100%;
     background: #000; overflow: hidden; font-family: 'Roboto', sans-serif;
-    user-select: none; -webkit-user-select: none;
 }
 
-/* 1. Gallery Fix: Fit to screen width, no zoom */
+/* 1. Gallery Fix: No zoom, fits screen width */
 .gallery-view {
-    position: fixed; inset: 0; z-index: 5000;
+    position: fixed; inset: 0; z-index: 9999;
     background: #000; display: flex; align-items: center; justify-content: center;
 }
 .gallery-view img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain; /* Ensures the whole image is visible */
+    width: 100%; height: 100%;
+    object-fit: contain;
 }
 
-/* 2. Background Image Fix */
+/* 2. Background Fix: Full screen image */
 .swiper-slide {
     width: 100vw; height: 100vh;
     background-image: url('background.jpg');
@@ -26,70 +24,49 @@ body, html {
     display: flex; align-items: center; justify-content: center;
 }
 
-/* 3. Black Box & Padding */
+/* 3. Black Box: 50px vertical padding */
 .content-wrapper {
-    width: 90%;
-    background: #000;
-    color: #fff;
-    padding: 50px 20px; /* 50px vertical padding */
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
+    width: 90%; background: #000; color: #fff;
+    padding: 50px 20px; box-sizing: border-box;
+    display: flex; flex-direction: column;
 }
 
 .title {
-    font-size: 28px;
-    font-weight: 700;
-    text-align: left;
-    margin-bottom: 20px;
-    width: 100%;
+    font-size: 28px; font-weight: 700; text-align: left;
+    margin-bottom: 20px; text-transform: uppercase;
 }
 
-/* 4. Two Column Numbered List */
+/* 4. Two Columns: 1-25 Left, 26-50 Right */
 .grid-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: repeat(25, auto);
-    grid-auto-flow: column; /* This forces 1-25 in col 1, 26-50 in col 2 */
-    gap: 2px 20px;
+    grid-auto-flow: column;
+    gap: 4px 15px;
     font-size: 14px;
 }
 
-.list-item {
-    white-space: nowrap;
-    text-align: left;
-}
+.list-item { white-space: nowrap; overflow: hidden; }
 
-/* 5. Separate Settings Page UI */
-.settings-page {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw; height: 100vh;
-    background: #111;
-    z-index: 9999;
-    color: white;
-    display: none; /* Controlled by JS */
-    flex-direction: column;
-    padding: 60px 20px 20px;
-    box-sizing: border-box;
-}
-
-.settings-header { font-size: 24px; font-weight: bold; margin-bottom: 30px; border-bottom: 1px solid #333; padding-bottom: 10px; }
-
-.settings-item {
-    display: flex; justify-content: space-between; align-items: center;
-    background: #222; padding: 15px; border-radius: 8px; margin-bottom: 10px;
-}
-
-.save-btn {
-    margin-top: auto; width: 100%; padding: 20px;
-    background: #fff; color: #000; font-weight: bold; border: none; border-radius: 8px;
-}
-
-/* Indicator */
+/* Magic Mode Indicator Dot */
 .indicator {
     position: fixed; bottom: 20px; left: 20px;
     width: 8px; height: 8px; background: rgba(128,128,128,0.5);
-    border-radius: 50%; opacity: 0; z-index: 6000;
+    border-radius: 50%; opacity: 0; z-index: 8000;
 }
 .indicator.active { opacity: 1; }
+
+/* Separate Settings UI */
+.settings-page {
+    position: fixed; inset: 0; background: #0a0a0a;
+    z-index: 10000; color: white; display: none;
+    flex-direction: column; padding: 60px 20px;
+}
+.settings-item {
+    display: flex; justify-content: space-between; align-items: center;
+    background: #1a1a1a; padding: 15px; border-radius: 8px; margin-bottom: 10px;
+}
+.save-btn {
+    margin-top: auto; padding: 20px; background: #fff; color: #000;
+    font-weight: bold; border: none; border-radius: 8px;
+}
