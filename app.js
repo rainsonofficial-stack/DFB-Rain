@@ -1,4 +1,9 @@
 let allLists = [movieData, cardData, objectData];
+// Store deep copy for restoration
+const originalItems = allLists.map(list => [...list.items]);
+// Track which indices are currently being forced
+let forcedIndices = [null, null]; 
+
 const container = document.getElementById('app-container');
 const gallery = document.getElementById('gallery-overlay');
 const swiperEl = document.querySelector('.swiper');
@@ -8,7 +13,7 @@ const settingsPage = document.getElementById('settings-page');
 let swiperInstance;
 let magicModeActive = false; 
 let inputBuffer = "";
-let forceCount = 0;
+let forceCount = 0; // 0, 1, or 2
 
 gallery.addEventListener('click', () => {
     gallery.style.display = 'none';
@@ -33,10 +38,7 @@ function initApp() {
     });
 
     if (swiperInstance) swiperInstance.destroy();
-    swiperInstance = new Swiper('.swiper', { 
-        loop: true,
-        allowTouchMove: true // ALWAYS ENABLED
-    });
+    swiperInstance = new Swiper('.swiper', { loop: true });
 }
 
 document.addEventListener('touchstart', (e) => {
@@ -48,36 +50,40 @@ document.addEventListener('touchstart', (e) => {
     const now = Date.now();
     const lastTap = document.body.dataset.lastTap || 0;
 
-    // Toggle Magic Mode Logic
     if (now - lastTap < 300) {
+        // Double Tap Bottom Right: Enter Magic Mode
         if (t.clientX > w * 0.8 && t.clientY > h * 0.8) {
-            magicModeActive = !magicModeActive;
+            magicModeActive = true;
             inputBuffer = "";
-            if (magicModeActive) {
-                indicator.classList.add('active');
-                if (navigator.vibrate) navigator.vibrate(60);
-            } else {
-                indicator.classList.remove('active');
-                if (navigator.vibrate) navigator.vibrate([30, 30]);
-            }
+            forceCount = 0; // Reset count to allow 2 new inputs
+            indicator.classList.add('active');
+            if (navigator.vibrate) navigator.vibrate(60);
             return;
         }
+        // Settings
         if (t.clientX < w * 0.2 && t.clientY > h * 0.8) {
             openSettings(); return;
         }
     }
     document.body.dataset.lastTap = now;
 
-    // Record Digits ONLY if Magic Mode is ON
     if (magicModeActive && forceCount < 2) {
         const digit = getGridDigit(t.clientX, t.clientY, w, h);
         inputBuffer += digit;
         
         if (inputBuffer.length === 2) {
-            applyForce(parseInt(inputBuffer));
+            applyGlobalForce(parseInt(inputBuffer));
             inputBuffer = "";
             forceCount++;
-            if (navigator.vibrate) navigator.vibrate([40, 60]);
+            
+            // Auto-Exit after 2nd force
+            if (forceCount === 2) {
+                magicModeActive = false;
+                indicator.classList.remove('active');
+                if (navigator.vibrate) navigator.vibrate([40, 40, 40]);
+            } else {
+                if (navigator.vibrate) navigator.vibrate(40);
+            }
         }
     }
 });
@@ -85,37 +91,45 @@ document.addEventListener('touchstart', (e) => {
 function getGridDigit(x, y, w, h) {
     const wrapper = document.querySelector('.content-wrapper');
     const rect = wrapper.getBoundingClientRect();
-
-    // If touching background image (Top/Bottom 15% of screen), return 0
     if (y < rect.top || y > rect.bottom) return "0";
-
-    // 3x3 Grid within the Black Box
     const col = Math.floor((x / w) * 3);
     const row = Math.floor(((y - rect.top) / rect.height) * 3);
     const digit = (row * 3) + col + 1;
-    
     return (digit > 9 || digit < 1) ? "0" : digit.toString();
 }
 
-function applyForce(position) {
+function applyGlobalForce(position) {
     const targetIdx = Math.min(Math.max(position - 1, 0), 49);
-    const activeIdx = swiperInstance.realIndex;
     
-    const slides = document.querySelectorAll('.swiper-slide');
-    slides.forEach((slide) => {
+    // 1. Restore previous forced index for this slot if it exists
+    if (forcedIndices[forceCount] !== null) {
+        const oldIdx = forcedIndices[forceCount];
+        allLists.forEach((list, i) => {
+            list.items[oldIdx] = originalItems[i][oldIdx];
+        });
+    }
+
+    // 2. Set the new force
+    forcedIndices[forceCount] = targetIdx;
+    allLists.forEach((list) => {
+        list.items[targetIdx] = list.forceWords[forceCount];
+    });
+
+    // 3. Update the UI on all slides immediately
+    updateUI();
+}
+
+function updateUI() {
+    // We target all slides (including swiper clones)
+    document.querySelectorAll('.swiper-slide').forEach((slide) => {
         const sIdx = parseInt(slide.getAttribute('data-swiper-slide-index'));
-        // We update the data ONLY for slides that are NOT current
-        if (sIdx !== activeIdx) {
+        if (!isNaN(sIdx)) {
             const listData = allLists[sIdx];
-            if (listData) {
-                const el = slide.querySelector(`[data-pos="${targetIdx}"]`);
-                if (el) {
-                    // Update UI and internal list data so it persists
-                    const newWord = listData.forceWords[forceCount];
-                    el.innerText = `${targetIdx + 1}. ${newWord}`;
-                    listData.items[targetIdx] = newWord;
-                }
-            }
+            // Update every item in the DOM to match current data state
+            listData.items.forEach((item, itemIdx) => {
+                const el = slide.querySelector(`[data-pos="${itemIdx}"]`);
+                if (el) el.innerText = `${itemIdx + 1}. ${item}`;
+            });
         }
     });
 }
@@ -135,6 +149,7 @@ function openSettings() {
 window.moveList = (i) => {
     if (i > 0) {
         [allLists[i], allLists[i-1]] = [allLists[i-1], allLists[i]];
+        [originalItems[i], originalItems[i-1]] = [originalItems[i-1], originalItems[i]];
         openSettings();
     }
 };
