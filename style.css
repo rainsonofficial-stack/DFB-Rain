@@ -56,10 +56,11 @@ html, body {
 
 .list-item { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* 2. BEEFY SAVE BUTTON */
+/* 2. BEEFY SAVE BUTTON - UPDATED SIZE ONLY */
 .close-btn {
     margin-top: auto; 
-    height: 75px; /* Very thick button */
+    height: 100px; /* Updated to be even thicker */
+    flex-shrink: 0; /* Ensures height is strictly maintained */
     background: #fff; color: #000;
     font-weight: 900; border: none; 
     border-radius: 12px; font-size: 20px;
@@ -73,11 +74,19 @@ html, body {
     flex-direction: column; padding: 40px 20px;
 }
 
+/* Added to ensure list items show up correctly inside the flex-column */
+#settings-list {
+    flex-grow: 1;
+    overflow-y: auto;
+    margin-bottom: 10px;
+}
+
 .settings-item {
     display: flex; justify-content: space-between; align-items: center;
     background: #222; padding: 15px; border-radius: 12px; 
     margin-bottom: 12px; border: 1px solid #333;
 }
+
 /* FIX: Move indicator to bottom left and make it visible */
 .indicator {
     position: fixed;
