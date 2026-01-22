@@ -1,19 +1,26 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
-body, html {
-    margin: 0; padding: 0; height: 100%; width: 100%;
-    background: #000; overflow: hidden; font-family: 'Roboto', sans-serif;
+/* Force everything to full height so centering works */
+html, body {
+    margin: 0; padding: 0;
+    height: 100%; width: 100%;
+    background: #000; overflow: hidden;
+    font-family: 'Roboto', sans-serif;
 }
 
-/* Gallery - Absolute centered fit */
+/* Gallery View */
 .gallery-view {
     position: fixed; inset: 0; z-index: 9999;
     background: #000; display: flex; align-items: center; justify-content: center;
 }
 .gallery-view img { width: 100%; height: 100%; object-fit: contain; }
 
-/* Swiper / Background Setup */
-.swiper { background: transparent; width: 100%; height: 100%; }
+/* Swiper Parents - Must be transparent and full height */
+.swiper {
+    width: 100%; height: 100vh;
+    background: transparent;
+}
+.swiper-wrapper { height: 100vh; background: transparent; }
 
 .swiper-slide {
     width: 100vw; height: 100vh;
@@ -21,36 +28,37 @@ body, html {
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    /* VERTICAL CENTERING FIX */
-    display: flex; 
-    flex-direction: column;
+    /* FORCE VERTICAL CENTERING */
+    display: flex;
     align-items: center; 
     justify-content: center;
 }
 
-/* Black Container - Full width, Centered, Limited Height */
+/* 2. The Black Box - Full width, Centered, Background visible above/below */
 .content-wrapper {
     width: 100%;
-    max-height: 72vh; /* Adjust this to show more/less background */
+    max-height: 70vh; /* This creates the gap top and bottom */
     background: #000;
     color: #fff;
-    padding: 25px 0;
+    padding: 30px 0;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
+    /* Extra insurance for centering */
+    margin: auto 0; 
 }
 
-/* Title - 21px (25% reduction from 28px) */
+/* Title - 21px */
 .title {
     font-size: 21px;
     font-weight: 700;
     margin-left: 20px;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     text-transform: uppercase;
     text-align: left;
 }
 
-/* List - 2 Columns (1-25 | 26-50) */
+/* List Grid */
 .grid-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -64,7 +72,7 @@ body, html {
 
 .list-item { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* Smaller Grey Indicator */
+/* Magic Mode Dot */
 .indicator {
     position: fixed; bottom: 15px; left: 15px;
     width: 3px; height: 3px;
@@ -73,6 +81,7 @@ body, html {
 }
 .indicator.active { opacity: 1; }
 
+/* Settings */
 .settings-page {
     position: fixed; inset: 0; background: #0a0a0a;
     z-index: 10000; color: white; display: none;
