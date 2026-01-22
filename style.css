@@ -59,7 +59,7 @@ html, body {
 /* 2. BEEFY SAVE BUTTON */
 .close-btn {
     margin-top: auto; 
-    height: 100px; /* Very thick button */
+    height: 75px; /* Very thick button */
     background: #fff; color: #000;
     font-weight: 900; border: none; 
     border-radius: 12px; font-size: 20px;
