@@ -1,5 +1,5 @@
 const cardData = {
-  title: "CARDS",
+  title: "Cards",
   forceCards: ["8♥️", "4♦️"],
   items: [
     "K♣️", "3♠️", "9♦️", "A♥️", "7♣️", "10♠️", "2♦️", "Q♥️",
