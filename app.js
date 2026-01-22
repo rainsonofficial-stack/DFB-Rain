@@ -1,4 +1,5 @@
 let allLists = [movieData, cardData, objectData];
+// originalItems remains for deep logic if needed, but not used for standard reset now
 const originalItems = allLists.map(list => [...list.items]);
 
 const container = document.getElementById('app-container');
@@ -46,8 +47,10 @@ document.addEventListener('touchstart', (e) => {
     const lastTap = document.body.dataset.lastTap || 0;
 
     if (now - lastTap < 300) {
+        // 4. Double Tap Bottom Right: Reset registered digits ONLY
         if (t.clientX > w * 0.8 && t.clientY > h * 0.8) {
-            resetMagic(); return;
+            softReset(); 
+            return;
         }
         if (t.clientX < w * 0.2 && t.clientY > h * 0.8) {
             openSettings(); return;
@@ -67,19 +70,31 @@ document.addEventListener('touchstart', (e) => {
     }
 });
 
-function resetMagic() {
-    inputBuffer = ""; forceCount = 0;
-    allLists.forEach((list, i) => { list.items = [...originalItems[i]]; });
-    initApp();
-    secretActive = true; indicator.classList.add('active');
-    if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+// Updated Reset: Only resets digits/mode, keeps list items as they are
+function softReset() {
+    inputBuffer = ""; 
+    forceCount = 0;
+    secretActive = true; 
+    indicator.classList.add('active');
+    if (navigator.vibrate) navigator.vibrate([40, 40]);
 }
 
 function getGridDigit(x, y, w, h) {
-    if (y < h * 0.17 || y > h * 0.83) return "0";
+    // 5. 3x3 Division happens within the black background (content-wrapper)
+    // Vertical: The black box is centered. Padding is 50px.
+    // Content box is roughly from 20% to 80% of height depending on list length.
+    // Logic: If touch is in the top/bottom margin area (background image visible), it's '0'.
+    
+    const wrapper = document.querySelector('.content-wrapper');
+    const rect = wrapper.getBoundingClientRect();
+
+    if (y < rect.top || y > rect.bottom) return "0";
+
     const col = Math.floor((x / w) * 3);
-    const row = Math.floor(((y - h * 0.17) / (h * 0.66)) * 3);
-    return ((row * 3) + col + 1).toString();
+    const row = Math.floor(((y - rect.top) / rect.height) * 3);
+    const digit = (row * 3) + col + 1;
+    
+    return (digit > 9 || digit < 1) ? "0" : digit.toString();
 }
 
 function applyForceDiscreetly(position) {
@@ -112,7 +127,6 @@ function openSettings() {
 window.moveList = (i) => {
     if (i > 0) {
         [allLists[i], allLists[i-1]] = [allLists[i-1], allLists[i]];
-        [originalItems[i], originalItems[i-1]] = [originalItems[i-1], originalItems[i]];
         openSettings();
     }
 };
@@ -121,3 +135,4 @@ document.getElementById('close-settings').onclick = () => {
     settingsPage.style.display = 'none';
     initApp();
 };
+
