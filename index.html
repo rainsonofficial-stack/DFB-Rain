@@ -15,16 +15,35 @@
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <link rel="stylesheet" href="style.css">
+
+    <style>
+        /* This ensures the gallery is ALWAYS on top and clickable at the start */
+        #gallery-overlay {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999 !important; 
+            cursor: pointer;
+        }
+        #gallery-overlay img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            pointer-events: none; /* Let the click pass through to the overlay div */
+        }
+    </style>
 </head>
 <body>
 
-    <div id="gallery-overlay" class="gallery-view">
+    <div id="gallery-overlay">
         <img src="gallery.jpg" alt="Gallery">
     </div>
 
     <div class="swiper" style="display: none;">
-        <div class="swiper-wrapper" id="app-container">
-            </div>
+        <div class="swiper-wrapper" id="app-container"></div>
     </div>
 
     <div id="indicator" class="indicator"></div>
@@ -43,9 +62,7 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('Service Worker Active'))
-                    .catch(err => console.log('SW Registration failed', err));
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log(err));
             });
         }
     </script>
