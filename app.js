@@ -1,8 +1,4 @@
-/**
- * APP CONFIGURATION & STATE
- */
-let allLists = [movieData, cardData, objectData]; 
-// Deep copy of original items to allow for a true reset
+let allLists = [movieData, cardData, objectData];
 const originalItems = allLists.map(list => [...list.items]);
 
 const container = document.getElementById('app-container');
@@ -16,9 +12,7 @@ let secretActive = false;
 let inputBuffer = "";
 let forceCount = 0;
 
-/**
- * INITIALIZATION & GALLERY TRANSITION
- */
+// Gallery Tap to Start
 gallery.addEventListener('click', () => {
     gallery.style.display = 'none';
     swiperEl.style.display = 'block';
@@ -33,7 +27,7 @@ function initApp() {
         
         let itemsHtml = '';
         list.items.forEach((item, itemIdx) => {
-            // Numbers 1 to 50 in 2 columns (via CSS grid)
+            // Adds numbering 1. 2. etc
             itemsHtml += `<div class="list-item" data-pos="${itemIdx}">${itemIdx + 1}. ${item}</div>`;
         });
 
@@ -47,17 +41,10 @@ function initApp() {
     });
 
     if (swiperInstance) swiperInstance.destroy();
-    swiperInstance = new Swiper('.swiper', { 
-        loop: true,
-        speed: 400
-    });
+    swiperInstance = new Swiper('.swiper', { loop: true });
 }
 
-/**
- * TOUCH EVENT HANDLING (LOGIC & TRIGGERS)
- */
 document.addEventListener('touchstart', (e) => {
-    // Prevent interaction if gallery or settings are visible
     if (gallery.style.display !== 'none' || settingsPage.style.display === 'flex') return;
     
     const t = e.touches[0];
@@ -66,109 +53,71 @@ document.addEventListener('touchstart', (e) => {
     const now = Date.now();
     const lastTap = document.body.dataset.lastTap || 0;
 
-    // Detection for Double Tap
     if (now - lastTap < 300) {
-        // TRIGGER 1: BOTTOM RIGHT (RESET + ACTIVATE MAGIC)
+        // Double Tap Bottom Right: Reset + Magic On
         if (t.clientX > w * 0.8 && t.clientY > h * 0.8) {
-            performGlobalReset();
-            if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+            resetMagic();
             return;
         }
-        // TRIGGER 2: BOTTOM LEFT (SETTINGS PAGE)
+        // Double Tap Bottom Left: Separate Settings Page
         if (t.clientX < w * 0.2 && t.clientY > h * 0.8) {
             openSettings();
-            if (navigator.vibrate) navigator.vibrate(50);
             return;
         }
     }
     document.body.dataset.lastTap = now;
 
-    // INPUT CAPTURE (3x3 GRID)
     if (secretActive && forceCount < 2) {
         const digit = getGridDigit(t.clientX, t.clientY, w, h);
         inputBuffer += digit;
-
         if (inputBuffer.length === 2) {
             applyForceDiscreetly(parseInt(inputBuffer));
-            inputBuffer = "";
-            forceCount++;
+            inputBuffer = ""; forceCount++;
             if (navigator.vibrate) navigator.vibrate([30, 50]);
-            
-            // Deactivate indicator after 2nd force
-            if (forceCount === 2) { 
-                secretActive = false; 
-                indicator.classList.remove('active'); 
-            }
+            if (forceCount === 2) { secretActive = false; indicator.classList.remove('active'); }
         }
     }
 });
 
-/**
- * SECRET LOGIC FUNCTIONS
- */
+function resetMagic() {
+    inputBuffer = ""; forceCount = 0;
+    allLists.forEach((list, i) => { list.items = [...originalItems[i]]; });
+    initApp();
+    secretActive = true;
+    indicator.classList.add('active');
+    if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+}
+
 function getGridDigit(x, y, w, h) {
-    // Check if touch is inside the 66% vertical black box area
     if (y < h * 0.17 || y > h * 0.83) return "0";
-    
     const col = Math.floor((x / w) * 3);
     const row = Math.floor(((y - h * 0.17) / (h * 0.66)) * 3);
-    const digit = (row * 3) + col + 1;
-    
-    return (digit > 9 || digit < 1) ? "0" : digit.toString();
+    return ((row * 3) + col + 1).toString();
 }
 
 function applyForceDiscreetly(position) {
     const targetIdx = Math.min(Math.max(position - 1, 0), 49);
     const activeIdx = swiperInstance.realIndex;
     
-    // Update all slides (including duplicates) EXCEPT the one currently on screen
     document.querySelectorAll('.swiper-slide').forEach((slide) => {
         const sIdx = parseInt(slide.getAttribute('data-swiper-slide-index'));
         if (sIdx !== activeIdx) {
             const listData = allLists[sIdx];
             if (listData) {
                 const el = slide.querySelector(`[data-pos="${targetIdx}"]`);
-                if (el) {
-                    el.innerText = `${targetIdx + 1}. ${listData.forceWords[forceCount]}`;
-                    // Store the change back to our main array so it persists if re-initialized
-                    listData.items[targetIdx] = listData.forceWords[forceCount];
-                }
+                if (el) el.innerText = `${targetIdx + 1}. ${listData.forceWords[forceCount]}`;
             }
         }
     });
 }
 
-function performGlobalReset() {
-    // Clear magic state
-    inputBuffer = "";
-    forceCount = 0;
-    
-    // Reset data to original values
-    allLists.forEach((list, i) => {
-        list.items = [...originalItems[i]];
-    });
-    
-    // Re-render UI
-    initApp();
-    
-    // Auto-reactivate for the next performance
-    secretActive = true;
-    indicator.classList.add('active');
-}
-
-/**
- * SETTINGS PAGE LOGIC
- */
 function openSettings() {
     const sList = document.getElementById('settings-list');
     sList.innerHTML = '';
     allLists.forEach((l, i) => {
         const item = document.createElement('div');
         item.className = 'settings-item';
-        item.innerHTML = `
-            <span>${l.title}</span> 
-            <button onclick="moveList(${i})">MOVE UP ↑</button>
-        `;
+        item.innerHTML = `<span>${l.title}</span> <button onclick="moveList(${i})">MOVE UP</button>`;
         sList.appendChild(item);
     });
     settingsPage.style.display = 'flex';
@@ -176,9 +125,7 @@ function openSettings() {
 
 window.moveList = (i) => {
     if (i > 0) {
-        // Swap list positions in the array
         [allLists[i], allLists[i-1]] = [allLists[i-1], allLists[i]];
-        // Swap original positions as well to keep reset logic consistent
         [originalItems[i], originalItems[i-1]] = [originalItems[i-1], originalItems[i]];
         openSettings();
     }
