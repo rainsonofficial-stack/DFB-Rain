@@ -1,5 +1,11 @@
-// Load saved order from memory or use default
-let allLists = loadOrder() || [movieData, cardData, objectData];
+// 4. PERSISTENT MEMORY LOGIC
+const listKey = 'user_list_order';
+const master = [movieData, cardData, objectData];
+let savedNames = JSON.parse(localStorage.getItem(listKey));
+
+// Load order from memory or default to master
+let allLists = savedNames ? savedNames.map(name => master.find(l => l.title === name)) : master;
+
 const originalItems = allLists.map(list => [...list.items]);
 let forcedIndices = [null, null]; 
 
@@ -130,26 +136,13 @@ function updateUI() {
     });
 }
 
-// Memory Persistence Functions
-function saveOrder() {
-    localStorage.setItem('list_order', JSON.stringify(allLists.map(l => l.title)));
-}
-
-function loadOrder() {
-    const saved = localStorage.getItem('list_order');
-    if (!saved) return null;
-    const orderNames = JSON.parse(saved);
-    const master = [movieData, cardData, objectData];
-    return orderNames.map(name => master.find(l => l.title === name));
-}
-
 function openSettings() {
     const sList = document.getElementById('settings-list');
     sList.innerHTML = '<h2>List Order</h2>';
     allLists.forEach((l, i) => {
         const item = document.createElement('div');
         item.className = 'settings-item';
-        item.innerHTML = `<span>${l.title}</span> <button class="move-btn" onclick="moveList(${i})">UP ↑</button>`;
+        item.innerHTML = `<span>${l.title}</span> <button onclick="moveList(${i})">UP ↑</button>`;
         sList.appendChild(item);
     });
     settingsPage.style.display = 'flex';
@@ -158,7 +151,8 @@ function openSettings() {
 window.moveList = (i) => {
     if (i > 0) {
         [allLists[i], allLists[i-1]] = [allLists[i-1], allLists[i]];
-        saveOrder(); // Remember new order immediately
+        // SAVE TO STORAGE
+        localStorage.setItem(listKey, JSON.stringify(allLists.map(l => l.title)));
         openSettings();
     }
 };
