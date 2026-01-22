@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Utility Grid</title>
+    <title>Utility</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
@@ -11,7 +11,7 @@
 <body>
 
     <div id="gallery-overlay" class="gallery-view">
-        <img src="gallery.jpg" alt="Gallery" id="gallery-img">
+        <img src="gallery.jpg" alt="View" id="gallery-img">
     </div>
 
     <div class="swiper" style="display: none;">
@@ -19,22 +19,17 @@
     </div>
 
     <div id="indicator" class="indicator"></div>
-    <div id="settings-overlay">
-        <div class="settings-header">REORDER LISTS</div>
-        <div id="settings-list-container"></div>
-        <div class="close-settings" id="close-settings">SAVE & CLOSE</div>
+
+    <div id="settings-page" class="settings-page" style="display: none;">
+        <div class="settings-header">CONFIG</div>
+        <div id="settings-list" class="settings-list"></div>
+        <button id="close-settings" class="save-btn">SAVE & EXIT</button>
     </div>
 
     <script src="movies.js"></script>
     <script src="cards.js"></script>
     <script src="objects.js"></script>
-    
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script src="app.js"></script>
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js');
-        }
-    </script>
 </body>
 </html>
