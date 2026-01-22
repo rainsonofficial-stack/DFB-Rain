@@ -78,3 +78,29 @@ html, body {
     background: #222; padding: 15px; border-radius: 12px; 
     margin-bottom: 12px; border: 1px solid #333;
 }
+/* FIX: Move indicator to bottom left and make it visible */
+.indicator {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 8px;
+    height: 8px;
+    background: rgba(128, 128, 128, 0.5); /* Faded grey */
+    border-radius: 50%;
+    z-index: 10001; /* Ensure it is above everything */
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.indicator.active {
+    opacity: 1;
+}
+
+/* FIX: Force Save Button Vertical Thickness */
+#close-settings.close-btn {
+    height: 75px !important; 
+    min-height: 75px !important; /* Forces the height even if flex tries to shrink it */
+    margin-top: 20px !important;
+    flex-shrink: 0; /* Prevents the layout from squishing the button */
+}
