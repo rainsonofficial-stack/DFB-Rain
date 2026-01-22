@@ -97,10 +97,34 @@ html, body {
     opacity: 1;
 }
 
-/* FIX: Force Save Button Vertical Thickness */
+/* 1. Make the settings page take up the full screen height */
+.settings-page {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    padding: 40px 20px !important;
+    box-sizing: border-box !important;
+}
+
+/* 2. Push the button to the very bottom of the screen */
+#settings-list {
+    flex-grow: 1 !important; /* This pushes the button down by taking up available space */
+}
+
+/* 3. Make the button a massive, clickable block */
+#close-settings.save-btn, 
 #close-settings.close-btn {
-    height: 100px !important; 
-    min-height: 100px !important; /* Forces the height even if flex tries to shrink it */
-    margin-top: 20px !important;
-    flex-shrink: 0; /* Prevents the layout from squishing the button */
+    width: 100% !important;
+    height: 80px !important; /* Thick vertical height */
+    line-height: 80px !important; /* Centers text vertically */
+    padding: 0 !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    font-weight: bold !important;
+    font-size: 18px !important;
+    border-radius: 12px !important;
+    border: none !important;
+    text-transform: uppercase !important;
+    margin-bottom: env(safe-area-inset-bottom, 20px) !important; /* Respects phone home bars */
+    cursor: pointer !important;
 }
