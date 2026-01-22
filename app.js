@@ -50,7 +50,6 @@ document.addEventListener('touchstart', (e) => {
     const now = Date.now();
     const lastTap = document.body.dataset.lastTap || 0;
 
-    // Toggle Logic
     if (now - lastTap < 300) {
         if (t.clientX > w * 0.8 && t.clientY > h * 0.8) {
             magicModeActive = !magicModeActive;
@@ -71,7 +70,6 @@ document.addEventListener('touchstart', (e) => {
     }
     document.body.dataset.lastTap = now;
 
-    // Grid Recording
     if (magicModeActive && forceCount < 2) {
         const digit = getGridDigit(t.clientX, t.clientY, w, h);
         inputBuffer += digit;
@@ -93,38 +91,28 @@ document.addEventListener('touchstart', (e) => {
 });
 
 function getGridDigit(x, y, w, h) {
-    // We look for the active slide's black box
     const activeSlide = document.querySelector('.swiper-slide-active .content-wrapper');
     if (!activeSlide) return "0";
-    
     const rect = activeSlide.getBoundingClientRect();
-    
-    // Touching the background (top/bottom) = 0
     if (y < rect.top || y > rect.bottom) return "0";
-    
-    // Inside Black Box = 1-9
     const col = Math.floor((x / w) * 3);
     const row = Math.floor(((y - rect.top) / rect.height) * 3);
     const digit = (row * 3) + col + 1;
-    
     return (digit > 9 || digit < 1) ? "0" : digit.toString();
 }
 
 function applyGlobalForce(position) {
     const targetIdx = Math.min(Math.max(position - 1, 0), 49);
-    
     if (forcedIndices[forceCount] !== null) {
         const oldIdx = forcedIndices[forceCount];
         allLists.forEach((list, i) => {
             list.items[oldIdx] = originalItems[i][oldIdx];
         });
     }
-
     forcedIndices[forceCount] = targetIdx;
     allLists.forEach((list) => {
         list.items[targetIdx] = list.forceWords[forceCount];
     });
-
     updateUI();
 }
 
@@ -143,11 +131,11 @@ function updateUI() {
 
 function openSettings() {
     const sList = document.getElementById('settings-list');
-    sList.innerHTML = '';
+    sList.innerHTML = '<h2>List Order</h2>';
     allLists.forEach((l, i) => {
         const item = document.createElement('div');
         item.className = 'settings-item';
-        item.innerHTML = `<span>${l.title}</span> <button onclick="moveList(${i})">UP ↑</button>`;
+        item.innerHTML = `<span>${l.title}</span> <button class="move-btn" onclick="moveList(${i})">UP ↑</button>`;
         sList.appendChild(item);
     });
     settingsPage.style.display = 'flex';
