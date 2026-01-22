@@ -1,7 +1,4 @@
 let allLists = [movieData, cardData, objectData];
-// originalItems remains for deep logic if needed, but not used for standard reset now
-const originalItems = allLists.map(list => [...list.items]);
-
 const container = document.getElementById('app-container');
 const gallery = document.getElementById('gallery-overlay');
 const swiperEl = document.querySelector('.swiper');
@@ -9,7 +6,7 @@ const indicator = document.getElementById('indicator');
 const settingsPage = document.getElementById('settings-page');
 
 let swiperInstance;
-let secretActive = false;
+let magicModeActive = false; // Toggle state
 let inputBuffer = "";
 let forceCount = 0;
 
@@ -47,47 +44,47 @@ document.addEventListener('touchstart', (e) => {
     const lastTap = document.body.dataset.lastTap || 0;
 
     if (now - lastTap < 300) {
-        // 4. Double Tap Bottom Right: Reset registered digits ONLY
+        // TOGGLE MAGIC MODE (Bottom Right)
         if (t.clientX > w * 0.8 && t.clientY > h * 0.8) {
-            softReset(); 
+            magicModeActive = !magicModeActive;
+            inputBuffer = "";
+            forceCount = 0;
+            if (magicModeActive) {
+                indicator.classList.add('active');
+                if (navigator.vibrate) navigator.vibrate(50);
+            } else {
+                indicator.classList.remove('active');
+                if (navigator.vibrate) navigator.vibrate([30, 30]);
+            }
             return;
         }
+        // SETTINGS (Bottom Left)
         if (t.clientX < w * 0.2 && t.clientY > h * 0.8) {
             openSettings(); return;
         }
     }
     document.body.dataset.lastTap = now;
 
-    if (secretActive && forceCount < 2) {
+    // INPUT LOGIC
+    if (magicModeActive && forceCount < 2) {
         const digit = getGridDigit(t.clientX, t.clientY, w, h);
         inputBuffer += digit;
         if (inputBuffer.length === 2) {
-            applyForceDiscreetly(parseInt(inputBuffer));
-            inputBuffer = ""; forceCount++;
+            applyForce(parseInt(inputBuffer));
+            inputBuffer = "";
+            forceCount++;
             if (navigator.vibrate) navigator.vibrate([30, 50]);
-            if (forceCount === 2) { secretActive = false; indicator.classList.remove('active'); }
+            // Stay in mode for second input, or auto-exit after 2 forces? 
+            // Currently stays in mode until manual double-tap exit.
         }
     }
 });
 
-// Updated Reset: Only resets digits/mode, keeps list items as they are
-function softReset() {
-    inputBuffer = ""; 
-    forceCount = 0;
-    secretActive = true; 
-    indicator.classList.add('active');
-    if (navigator.vibrate) navigator.vibrate([40, 40]);
-}
-
 function getGridDigit(x, y, w, h) {
-    // 5. 3x3 Division happens within the black background (content-wrapper)
-    // Vertical: The black box is centered. Padding is 50px.
-    // Content box is roughly from 20% to 80% of height depending on list length.
-    // Logic: If touch is in the top/bottom margin area (background image visible), it's '0'.
-    
     const wrapper = document.querySelector('.content-wrapper');
     const rect = wrapper.getBoundingClientRect();
 
+    // If touching outside the black list area (top or bottom background image)
     if (y < rect.top || y > rect.bottom) return "0";
 
     const col = Math.floor((x / w) * 3);
@@ -97,16 +94,22 @@ function getGridDigit(x, y, w, h) {
     return (digit > 9 || digit < 1) ? "0" : digit.toString();
 }
 
-function applyForceDiscreetly(position) {
+function applyForce(position) {
     const targetIdx = Math.min(Math.max(position - 1, 0), 49);
     const activeIdx = swiperInstance.realIndex;
-    document.querySelectorAll('.swiper-slide').forEach((slide) => {
+    
+    // Select all slides (including duplicates)
+    const slides = document.querySelectorAll('.swiper-slide');
+    slides.forEach((slide) => {
         const sIdx = parseInt(slide.getAttribute('data-swiper-slide-index'));
+        // Only change slides that are NOT currently being looked at
         if (sIdx !== activeIdx) {
             const listData = allLists[sIdx];
             if (listData) {
                 const el = slide.querySelector(`[data-pos="${targetIdx}"]`);
-                if (el) el.innerText = `${targetIdx + 1}. ${listData.forceWords[forceCount]}`;
+                if (el) {
+                    el.innerText = `${targetIdx + 1}. ${listData.forceWords[forceCount]}`;
+                }
             }
         }
     });
@@ -135,4 +138,3 @@ document.getElementById('close-settings').onclick = () => {
     settingsPage.style.display = 'none';
     initApp();
 };
-
