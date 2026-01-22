@@ -5,74 +5,65 @@ body, html {
     background: #000; overflow: hidden; font-family: 'Roboto', sans-serif;
 }
 
-/* Gallery Fix */
+/* Gallery Fit */
 .gallery-view {
     position: fixed; inset: 0; z-index: 9999;
     background: #000; display: flex; align-items: center; justify-content: center;
 }
 .gallery-view img { width: 100%; height: 100%; object-fit: contain; }
 
-/* Background Image Viewport */
+/* Background Visibility */
 .swiper-slide {
     width: 100vw; height: 100vh;
     background-image: url('background.jpg');
     background-size: cover;
     background-position: center;
-    display: flex; align-items: center; justify-content: center;
+    display: flex; align-items: center; justify-content: center; /* Centering the black box */
 }
 
-/* 2. Black Box: Full width, vertical space only */
+/* Black Box: Full width, height based on content */
 .content-wrapper {
-    width: 100%; /* Extended fully on both sides */
-    background: #000; color: #fff;
-    padding: 50px 20px; /* Space above and below for background image and '0' input */
+    width: 100%;
+    background: #000;
+    color: #fff;
+    padding: 20px; /* Reduced vertical padding inside box */
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
+    max-height: 80vh; /* Ensures at least 10% space top and bottom for background image */
 }
 
-/* 6. Reduce Title font size by 25% (28px * 0.75 = 21px) */
 .title {
     font-size: 21px;
     font-weight: 700;
-    text-align: left;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     text-transform: uppercase;
 }
 
-/* 1. Decrease Line Spacing */
+/* List Layout */
 .grid-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: repeat(25, auto);
     grid-auto-flow: column;
-    gap: 1px 15px; /* Reduced gap for a shorter vertical block */
+    gap: 0px 15px; /* Extremely tight for vertical compression */
     font-size: 14px;
-    line-height: 1.1; /* Tighter line height */
+    line-height: 1.1;
 }
 
 .list-item { white-space: nowrap; overflow: hidden; }
 
-/* 3. Smaller Grey Dot Indicator */
+/* Indicator */
 .indicator {
     position: fixed; bottom: 20px; left: 20px;
-    width: 4px; height: 4px; /* Reduced from 8px */
-    background: rgba(128,128,128,0.4);
+    width: 4px; height: 4px;
+    background: rgba(255,255,255,0.4); /* Made it white-grey for visibility */
     border-radius: 50%; opacity: 0; z-index: 8000;
 }
 .indicator.active { opacity: 1; }
 
-/* Separate Settings UI */
 .settings-page {
     position: fixed; inset: 0; background: #0a0a0a;
     z-index: 10000; color: white; display: none;
     flex-direction: column; padding: 60px 20px;
-}
-.settings-item {
-    display: flex; justify-content: space-between; align-items: center;
-    background: #1a1a1a; padding: 15px; border-radius: 8px; margin-bottom: 10px;
-}
-.save-btn {
-    margin-top: auto; padding: 20px; background: #fff; color: #000;
-    font-weight: bold; border: none; border-radius: 8px;
 }
