@@ -5,17 +5,14 @@ body, html {
     background: #000; overflow: hidden; font-family: 'Roboto', sans-serif;
 }
 
-/* 1. Gallery Fix: No zoom, fits screen width */
+/* Gallery Fix */
 .gallery-view {
     position: fixed; inset: 0; z-index: 9999;
     background: #000; display: flex; align-items: center; justify-content: center;
 }
-.gallery-view img {
-    width: 100%; height: 100%;
-    object-fit: contain;
-}
+.gallery-view img { width: 100%; height: 100%; object-fit: contain; }
 
-/* 2. Background Fix: Full screen image */
+/* Background Image Viewport */
 .swiper-slide {
     width: 100vw; height: 100vh;
     background-image: url('background.jpg');
@@ -24,34 +21,43 @@ body, html {
     display: flex; align-items: center; justify-content: center;
 }
 
-/* 3. Black Box: 50px vertical padding */
+/* 2. Black Box: Full width, vertical space only */
 .content-wrapper {
-    width: 90%; background: #000; color: #fff;
-    padding: 50px 20px; box-sizing: border-box;
-    display: flex; flex-direction: column;
+    width: 100%; /* Extended fully on both sides */
+    background: #000; color: #fff;
+    padding: 50px 20px; /* Space above and below for background image and '0' input */
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
 }
 
+/* 6. Reduce Title font size by 25% (28px * 0.75 = 21px) */
 .title {
-    font-size: 28px; font-weight: 700; text-align: left;
-    margin-bottom: 20px; text-transform: uppercase;
+    font-size: 21px;
+    font-weight: 700;
+    text-align: left;
+    margin-bottom: 15px;
+    text-transform: uppercase;
 }
 
-/* 4. Two Columns: 1-25 Left, 26-50 Right */
+/* 1. Decrease Line Spacing */
 .grid-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: repeat(25, auto);
     grid-auto-flow: column;
-    gap: 4px 15px;
+    gap: 1px 15px; /* Reduced gap for a shorter vertical block */
     font-size: 14px;
+    line-height: 1.1; /* Tighter line height */
 }
 
 .list-item { white-space: nowrap; overflow: hidden; }
 
-/* Magic Mode Indicator Dot */
+/* 3. Smaller Grey Dot Indicator */
 .indicator {
     position: fixed; bottom: 20px; left: 20px;
-    width: 8px; height: 8px; background: rgba(128,128,128,0.5);
+    width: 4px; height: 4px; /* Reduced from 8px */
+    background: rgba(128,128,128,0.4);
     border-radius: 50%; opacity: 0; z-index: 8000;
 }
 .indicator.active { opacity: 1; }
