@@ -1,64 +1,55 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
-/* Force everything to full height so centering works */
 html, body {
     margin: 0; padding: 0;
     height: 100%; width: 100%;
-    background: #000; overflow: hidden;
+    /* Background is now on the body so it shows behind the swiper */
+    background-image: url('background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-color: #000;
+    overflow: hidden;
     font-family: 'Roboto', sans-serif;
 }
 
-/* Gallery View */
+/* Gallery - Stays on top of everything */
 .gallery-view {
     position: fixed; inset: 0; z-index: 9999;
     background: #000; display: flex; align-items: center; justify-content: center;
 }
 .gallery-view img { width: 100%; height: 100%; object-fit: contain; }
 
-/* Swiper Parents - Must be transparent and full height */
+/* 1 & 2. THE SWIPER IS THE BLACK BOX */
 .swiper {
-    width: 100%; height: 100vh;
-    background: transparent;
-}
-.swiper-wrapper { height: 100vh; background: transparent; }
-
-.swiper-slide {
-    width: 100vw; height: 100vh;
-    background-image: url('background.jpg');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    /* FORCE VERTICAL CENTERING */
-    display: flex;
-    align-items: center; 
-    justify-content: center;
-}
-
-/* 2. The Black Box - Full width, Centered, Background visible above/below */
-.content-wrapper {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
     width: 100%;
-    max-height: 70vh; /* This creates the gap top and bottom */
+    height: 70vh; /* Exactly the black box height */
     background: #000;
     color: #fff;
-    padding: 30px 0;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    /* Extra insurance for centering */
-    margin: auto 0; 
+    z-index: 10;
+    display: none; /* Hidden until gallery is clicked */
 }
 
-/* Title - 21px */
+.swiper-slide {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 25px 0;
+    box-sizing: border-box;
+}
+
 .title {
     font-size: 21px;
     font-weight: 700;
     margin-left: 20px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     text-transform: uppercase;
-    text-align: left;
 }
 
-/* List Grid */
 .grid-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -72,7 +63,7 @@ html, body {
 
 .list-item { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* Magic Mode Dot */
+/* Dot Indicator */
 .indicator {
     position: fixed; bottom: 15px; left: 15px;
     width: 3px; height: 3px;
