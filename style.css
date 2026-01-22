@@ -3,50 +3,50 @@
 html, body {
     margin: 0; padding: 0;
     height: 100%; width: 100%;
-    /* Background is now on the body so it shows behind the swiper */
-    background-image: url('background.jpg');
-    background-size: cover;
-    background-position: center;
-    background-color: #000;
+    background: #000; /* Body is black; background is now on the slides */
     overflow: hidden;
     font-family: 'Roboto', sans-serif;
 }
 
-/* Gallery - Stays on top of everything */
-.gallery-view {
-    position: fixed; inset: 0; z-index: 9999;
-    background: #000; display: flex; align-items: center; justify-content: center;
-}
-.gallery-view img { width: 100%; height: 100%; object-fit: contain; }
-
-/* 1 & 2. THE SWIPER IS THE BLACK BOX */
+/* Full screen Swiper */
 .swiper {
-    position: absolute;
-    top: 50%;
-    left: 0;
-    transform: translateY(-50%);
+    position: fixed;
+    inset: 0;
     width: 100%;
-    height: 70vh; /* Exactly the black box height */
-    background: #000;
-    color: #fff;
-    z-index: 10;
-    display: none; /* Hidden until gallery is clicked */
+    height: 100%;
 }
 
 .swiper-slide {
     width: 100%;
     height: 100%;
+    /* The background image moves with the swipe */
+    background-image: url('background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: center; /* Centering the black box vertically on screen */
+    justify-content: center;
+}
+
+/* 2. The Black Box: Centered with centered list inside */
+.content-wrapper {
+    width: 100%;
+    height: 70vh; /* Grid Area */
+    background: #000;
+    color: #fff;
     display: flex;
     flex-direction: column;
-    padding: 25px 0;
+    justify-content: center; /* Centering the list text vertically inside the box */
     box-sizing: border-box;
+    padding: 20px 0;
 }
 
 .title {
     font-size: 21px;
     font-weight: 700;
     margin-left: 20px;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     text-transform: uppercase;
 }
 
@@ -77,12 +77,4 @@ html, body {
     position: fixed; inset: 0; background: #0a0a0a;
     z-index: 10000; color: white; display: none;
     flex-direction: column; padding: 60px 20px;
-}
-.settings-item {
-    display: flex; justify-content: space-between; align-items: center;
-    background: #1a1a1a; padding: 15px; border-radius: 8px; margin-bottom: 10px;
-}
-.save-btn {
-    margin-top: auto; padding: 20px; background: #fff; color: #000;
-    font-weight: bold; border: none; border-radius: 8px;
 }
