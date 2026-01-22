@@ -5,16 +5,15 @@ body, html {
     background: #000; overflow: hidden; font-family: 'Roboto', sans-serif;
 }
 
-/* Gallery - No zoom, fits screen */
+/* Gallery - Absolute centered fit */
 .gallery-view {
     position: fixed; inset: 0; z-index: 9999;
     background: #000; display: flex; align-items: center; justify-content: center;
 }
 .gallery-view img { width: 100%; height: 100%; object-fit: contain; }
 
-/* Swiper Background Fix */
+/* Swiper / Background Setup */
 .swiper { background: transparent; width: 100%; height: 100%; }
-.swiper-wrapper { background: transparent; }
 
 .swiper-slide {
     width: 100vw; height: 100vh;
@@ -22,33 +21,36 @@ body, html {
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+    /* VERTICAL CENTERING FIX */
     display: flex; 
-    align-items: center; /* Vertically Centers the Black Box */
+    flex-direction: column;
+    align-items: center; 
     justify-content: center;
 }
 
-/* 2. Black Box - Full width, centered, background visible above/below */
+/* Black Container - Full width, Centered, Limited Height */
 .content-wrapper {
     width: 100%;
-    max-height: 70vh; /* Limits box to 70% of screen height */
-    background: #000; /* Only the list area is black */
+    max-height: 72vh; /* Adjust this to show more/less background */
+    background: #000;
     color: #fff;
-    padding: 30px 0;
+    padding: 25px 0;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
 }
 
-/* 6. Title 25% smaller */
+/* Title - 21px (25% reduction from 28px) */
 .title {
     font-size: 21px;
     font-weight: 700;
     margin-left: 20px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     text-transform: uppercase;
+    text-align: left;
 }
 
-/* 1. Tight line spacing for shorter block */
+/* List - 2 Columns (1-25 | 26-50) */
 .grid-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -60,9 +62,9 @@ body, html {
     line-height: 1.05;
 }
 
-.list-item { white-space: nowrap; overflow: hidden; }
+.list-item { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* 3. Smaller Indicator */
+/* Smaller Grey Indicator */
 .indicator {
     position: fixed; bottom: 15px; left: 15px;
     width: 3px; height: 3px;
@@ -75,4 +77,12 @@ body, html {
     position: fixed; inset: 0; background: #0a0a0a;
     z-index: 10000; color: white; display: none;
     flex-direction: column; padding: 60px 20px;
+}
+.settings-item {
+    display: flex; justify-content: space-between; align-items: center;
+    background: #1a1a1a; padding: 15px; border-radius: 8px; margin-bottom: 10px;
+}
+.save-btn {
+    margin-top: auto; padding: 20px; background: #fff; color: #000;
+    font-weight: bold; border: none; border-radius: 8px;
 }
