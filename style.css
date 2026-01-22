@@ -1,176 +1,95 @@
-/* Core Reset */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
 body, html {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    width: 100%;
-    background: #000;
-    overflow: hidden;
-    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    user-select: none;
-    -webkit-user-select: none;
-    -webkit-tap-highlight-color: transparent;
+    margin: 0; padding: 0; height: 100%; width: 100%;
+    background: #000; overflow: hidden; font-family: 'Roboto', sans-serif;
+    user-select: none; -webkit-user-select: none;
 }
 
-/* Gallery / Cover View */
+/* 1. Gallery Fix: Fit to screen width, no zoom */
 .gallery-view {
-    position: fixed;
-    inset: 0;
-    z-index: 500;
-    background: #000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    position: fixed; inset: 0; z-index: 5000;
+    background: #000; display: flex; align-items: center; justify-content: center;
 }
-
 .gallery-view img {
     width: 100%;
-    height: auto;
-    display: block;
-}
-
-/* Swiper Container */
-.swiper {
-    width: 100%;
     height: 100%;
+    object-fit: contain; /* Ensures the whole image is visible */
 }
 
-/* Slide with Background Image */
+/* 2. Background Image Fix */
 .swiper-slide {
-    width: 100%;
-    height: 100%;
+    width: 100vw; height: 100vh;
     background-image: url('background.jpg');
     background-size: cover;
     background-position: center;
-    background-repeat: no-repeat;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
 }
 
-/* The Black List Container */
+/* 3. Black Box & Padding */
 .content-wrapper {
     width: 90%;
-    background: black;
-    color: white;
-    /* Strict 50px padding top and bottom as requested */
-    padding: 50px 20px;
+    background: #000;
+    color: #fff;
+    padding: 50px 20px; /* 50px vertical padding */
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 0 20px rgba(0,0,0,0.5);
 }
 
-/* Title Styling */
 .title {
     font-size: 28px;
-    font-weight: bold;
-    margin-bottom: 20px;
+    font-weight: 700;
     text-align: left;
+    margin-bottom: 20px;
     width: 100%;
-    text-transform: uppercase;
-    letter-spacing: 1px;
 }
 
-/* 2-Column Numbered List */
+/* 4. Two Column Numbered List */
 .grid-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    column-gap: 20px;
-    row-gap: 4px;
+    grid-template-rows: repeat(25, auto);
+    grid-auto-flow: column; /* This forces 1-25 in col 1, 26-50 in col 2 */
+    gap: 2px 20px;
     font-size: 14px;
 }
 
 .list-item {
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: #fff;
+    text-align: left;
 }
 
-/* Hidden Magic Indicator */
-.indicator {
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    width: 8px;
-    height: 8px;
-    background: rgba(128, 128, 128, 0.4);
-    border-radius: 50%;
-    opacity: 0;
-    pointer-events: none;
-    z-index: 1000;
-    transition: opacity 0.3s ease;
-}
-
-.indicator.active {
-    opacity: 1;
-}
-
-/* Settings Overlay Page */
+/* 5. Separate Settings Page UI */
 .settings-page {
     position: fixed;
-    inset: 0;
-    z-index: 2000;
-    background: #0a0a0a;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: #111;
+    z-index: 9999;
     color: white;
-    padding: 60px 30px;
-    display: flex;
+    display: none; /* Controlled by JS */
     flex-direction: column;
+    padding: 60px 20px 20px;
+    box-sizing: border-box;
 }
 
-.settings-header {
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 40px;
-    color: #888;
-    letter-spacing: 2px;
-}
-
-.settings-list {
-    flex-grow: 1;
-}
+.settings-header { font-size: 24px; font-weight: bold; margin-bottom: 30px; border-bottom: 1px solid #333; padding-bottom: 10px; }
 
 .settings-item {
-    padding: 20px;
-    background: #1a1a1a;
-    margin-bottom: 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-radius: 8px;
-    border: 1px solid #333;
-}
-
-.settings-item span {
-    font-size: 18px;
-}
-
-.settings-item button {
-    background: #333;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: bold;
+    display: flex; justify-content: space-between; align-items: center;
+    background: #222; padding: 15px; border-radius: 8px; margin-bottom: 10px;
 }
 
 .save-btn {
-    width: 100%;
-    padding: 20px;
-    background: #f0f0f0;
-    color: #000;
-    border: none;
-    font-weight: bold;
-    font-size: 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    margin-top: 20px;
+    margin-top: auto; width: 100%; padding: 20px;
+    background: #fff; color: #000; font-weight: bold; border: none; border-radius: 8px;
 }
 
-/* Swiper Loop - Prevent visual flicker on duplicates */
-.swiper-slide-duplicate .list-item {
-    color: #fff;
+/* Indicator */
+.indicator {
+    position: fixed; bottom: 20px; left: 20px;
+    width: 8px; height: 8px; background: rgba(128,128,128,0.5);
+    border-radius: 50%; opacity: 0; z-index: 6000;
 }
+.indicator.active { opacity: 1; }
