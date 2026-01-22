@@ -1,55 +1,176 @@
+/* Core Reset */
 body, html {
-    margin: 0; padding: 0; height: 100%; width: 100%;
-    background: #000; overflow: hidden; font-family: sans-serif;
-    user-select: none; -webkit-user-select: none;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    background: #000;
+    overflow: hidden;
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
+/* Gallery / Cover View */
 .gallery-view {
-    position: fixed; inset: 0; z-index: 500;
-    background: #000; display: flex; align-items: center; justify-content: center;
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
-.gallery-view img { width: 100%; height: auto; transition: transform 0.5s ease-in; }
-.zoom-out { transform: scale(3); opacity: 0; pointer-events: none; }
 
-.swiper { width: 100%; height: 100%; }
+.gallery-view img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Swiper Container */
+.swiper {
+    width: 100%;
+    height: 100%;
+}
+
+/* Slide with Background Image */
 .swiper-slide {
-    width: 100%; height: 100%;
+    width: 100%;
+    height: 100%;
     background-image: url('background.jpg');
-    background-size: cover; background-position: center;
-    display: flex; align-items: center; justify-content: center;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
+/* The Black List Container */
 .content-wrapper {
-    width: 90%; height: 66%;
-    background: black; color: white;
-    padding: 20px; box-sizing: border-box;
-    display: flex; flex-direction: column;
+    width: 90%;
+    background: black;
+    color: white;
+    /* Strict 50px padding top and bottom as requested */
+    padding: 50px 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
 }
 
-.title { font-size: 28px; margin-bottom: 15px; font-weight: bold; text-align: left; }
+/* Title Styling */
+.title {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-align: left;
+    width: 100%;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* 2-Column Numbered List */
 .grid-container {
-    display: grid; grid-template-columns: 1fr 1fr;
-    font-size: 14px; line-height: 1.4; gap: 4px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 20px;
+    row-gap: 4px;
+    font-size: 14px;
 }
 
+.list-item {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #fff;
+}
+
+/* Hidden Magic Indicator */
 .indicator {
-    position: fixed; bottom: 20px; left: 20px;
-    width: 6px; height: 6px; background: rgba(128,128,128,0.3);
-    border-radius: 50%; opacity: 0; z-index: 1000;
-}
-.indicator.active { opacity: 1; }
-
-#settings-overlay {
-    position: fixed; inset: 0; z-index: 2000;
-    background: rgba(0,0,0,0.95); color: white;
-    display: none; flex-direction: column; padding: 50px 20px;
-}
-.list-order-item {
-    padding: 15px; margin-bottom: 10px; background: #111;
-    border: 1px solid #333; display: flex; justify-content: space-between; align-items: center;
-}
-.close-settings {
-    margin-top: auto; padding: 15px; background: white; color: black;
-    text-align: center; font-weight: bold; cursor: pointer;
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 8px;
+    height: 8px;
+    background: rgba(128, 128, 128, 0.4);
+    border-radius: 50%;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 1000;
+    transition: opacity 0.3s ease;
 }
 
+.indicator.active {
+    opacity: 1;
+}
+
+/* Settings Overlay Page */
+.settings-page {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    background: #0a0a0a;
+    color: white;
+    padding: 60px 30px;
+    display: flex;
+    flex-direction: column;
+}
+
+.settings-header {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 40px;
+    color: #888;
+    letter-spacing: 2px;
+}
+
+.settings-list {
+    flex-grow: 1;
+}
+
+.settings-item {
+    padding: 20px;
+    background: #1a1a1a;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 8px;
+    border: 1px solid #333;
+}
+
+.settings-item span {
+    font-size: 18px;
+}
+
+.settings-item button {
+    background: #333;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.save-btn {
+    width: 100%;
+    padding: 20px;
+    background: #f0f0f0;
+    color: #000;
+    border: none;
+    font-weight: bold;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+/* Swiper Loop - Prevent visual flicker on duplicates */
+.swiper-slide-duplicate .list-item {
+    color: #fff;
+}
