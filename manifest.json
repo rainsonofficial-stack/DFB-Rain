@@ -1,6 +1,6 @@
 {
-  "name": "Grid",
-  "short_name": "Grid",
+  "name": "Gallery",
+  "short_name": "Gallery",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
