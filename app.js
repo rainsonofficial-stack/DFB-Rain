@@ -28,10 +28,11 @@ function initApp() {
         list.items.forEach((item, itemIdx) => {
             itemsHtml += `<div class="list-item" data-pos="${itemIdx}">${itemIdx + 1}. ${item}</div>`;
         });
-        // Note: No .content-wrapper here, the swiper-slide is the content
         slide.innerHTML = `
-            <div class="title">${list.title}</div>
-            <div class="grid-container">${itemsHtml}</div>
+            <div class="content-wrapper">
+                <div class="title">${list.title}</div>
+                <div class="grid-container">${itemsHtml}</div>
+            </div>
         `;
         container.appendChild(slide);
     });
@@ -49,31 +50,28 @@ document.addEventListener('touchstart', (e) => {
     const now = Date.now();
     const lastTap = document.body.dataset.lastTap || 0;
 
-    // Double Tap Logic
+    // Toggle Logic
     if (now - lastTap < 300) {
-        // Bottom Right: Toggle Mode
         if (t.clientX > w * 0.8 && t.clientY > h * 0.8) {
-            if (!magicModeActive) {
-                magicModeActive = true;
-                inputBuffer = "";
-                forceCount = 0; 
+            magicModeActive = !magicModeActive;
+            inputBuffer = "";
+            forceCount = 0; 
+            if (magicModeActive) {
                 indicator.classList.add('active');
                 if (navigator.vibrate) navigator.vibrate(60);
             } else {
-                magicModeActive = false;
                 indicator.classList.remove('active');
                 if (navigator.vibrate) navigator.vibrate([30, 30]);
             }
             return;
         }
-        // Bottom Left: Settings
         if (t.clientX < w * 0.2 && t.clientY > h * 0.8) {
             openSettings(); return;
         }
     }
     document.body.dataset.lastTap = now;
 
-    // 3x3 Grid Logic
+    // Grid Recording
     if (magicModeActive && forceCount < 2) {
         const digit = getGridDigit(t.clientX, t.clientY, w, h);
         inputBuffer += digit;
@@ -83,7 +81,6 @@ document.addEventListener('touchstart', (e) => {
             inputBuffer = "";
             forceCount++;
             
-            // Auto-Exit after 2nd force
             if (forceCount === 2) {
                 magicModeActive = false;
                 indicator.classList.remove('active');
@@ -96,12 +93,16 @@ document.addEventListener('touchstart', (e) => {
 });
 
 function getGridDigit(x, y, w, h) {
-    const rect = swiperEl.getBoundingClientRect();
+    // We look for the active slide's black box
+    const activeSlide = document.querySelector('.swiper-slide-active .content-wrapper');
+    if (!activeSlide) return "0";
     
-    // Outside the black box = 0
+    const rect = activeSlide.getBoundingClientRect();
+    
+    // Touching the background (top/bottom) = 0
     if (y < rect.top || y > rect.bottom) return "0";
     
-    // Inside the black box = 1-9
+    // Inside Black Box = 1-9
     const col = Math.floor((x / w) * 3);
     const row = Math.floor(((y - rect.top) / rect.height) * 3);
     const digit = (row * 3) + col + 1;
@@ -112,7 +113,6 @@ function getGridDigit(x, y, w, h) {
 function applyGlobalForce(position) {
     const targetIdx = Math.min(Math.max(position - 1, 0), 49);
     
-    // Restore original words for this force slot (1st or 2nd)
     if (forcedIndices[forceCount] !== null) {
         const oldIdx = forcedIndices[forceCount];
         allLists.forEach((list, i) => {
@@ -120,7 +120,6 @@ function applyGlobalForce(position) {
         });
     }
 
-    // Apply new force to all lists
     forcedIndices[forceCount] = targetIdx;
     allLists.forEach((list) => {
         list.items[targetIdx] = list.forceWords[forceCount];
@@ -166,4 +165,3 @@ document.getElementById('close-settings').onclick = () => {
     settingsPage.style.display = 'none';
     initApp();
 };
-
