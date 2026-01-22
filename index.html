@@ -5,13 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Utility</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 </head>
 <body>
 
     <div id="gallery-overlay" class="gallery-view">
-        <img src="gallery.jpg" alt="View" id="gallery-img">
+        <img src="gallery.jpg" alt="Gallery View">
     </div>
 
     <div class="swiper" style="display: none;">
@@ -20,10 +19,10 @@
 
     <div id="indicator" class="indicator"></div>
 
-    <div id="settings-page" class="settings-page" style="display: none;">
-        <div class="settings-header">CONFIG</div>
-        <div id="settings-list" class="settings-list"></div>
-        <button id="close-settings" class="save-btn">SAVE & EXIT</button>
+    <div id="settings-page" class="settings-page">
+        <div class="settings-header">SETTINGS</div>
+        <div id="settings-list"></div>
+        <button id="close-settings" class="save-btn">SAVE & CLOSE</button>
     </div>
 
     <script src="movies.js"></script>
