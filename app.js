@@ -1,7 +1,5 @@
 let allLists = [movieData, cardData, objectData];
-// Store deep copy for restoration
 const originalItems = allLists.map(list => [...list.items]);
-// Track which indices are currently being forced
 let forcedIndices = [null, null]; 
 
 const container = document.getElementById('app-container');
@@ -13,7 +11,7 @@ const settingsPage = document.getElementById('settings-page');
 let swiperInstance;
 let magicModeActive = false; 
 let inputBuffer = "";
-let forceCount = 0; // 0, 1, or 2
+let forceCount = 0;
 
 gallery.addEventListener('click', () => {
     gallery.style.display = 'none';
@@ -30,10 +28,11 @@ function initApp() {
         list.items.forEach((item, itemIdx) => {
             itemsHtml += `<div class="list-item" data-pos="${itemIdx}">${itemIdx + 1}. ${item}</div>`;
         });
-        slide.innerHTML = `<div class="content-wrapper">
+        // Note: No .content-wrapper here, the swiper-slide is the content
+        slide.innerHTML = `
             <div class="title">${list.title}</div>
             <div class="grid-container">${itemsHtml}</div>
-        </div>`;
+        `;
         container.appendChild(slide);
     });
 
@@ -50,23 +49,31 @@ document.addEventListener('touchstart', (e) => {
     const now = Date.now();
     const lastTap = document.body.dataset.lastTap || 0;
 
+    // Double Tap Logic
     if (now - lastTap < 300) {
-        // Double Tap Bottom Right: Enter Magic Mode
+        // Bottom Right: Toggle Mode
         if (t.clientX > w * 0.8 && t.clientY > h * 0.8) {
-            magicModeActive = true;
-            inputBuffer = "";
-            forceCount = 0; // Reset count to allow 2 new inputs
-            indicator.classList.add('active');
-            if (navigator.vibrate) navigator.vibrate(60);
+            if (!magicModeActive) {
+                magicModeActive = true;
+                inputBuffer = "";
+                forceCount = 0; 
+                indicator.classList.add('active');
+                if (navigator.vibrate) navigator.vibrate(60);
+            } else {
+                magicModeActive = false;
+                indicator.classList.remove('active');
+                if (navigator.vibrate) navigator.vibrate([30, 30]);
+            }
             return;
         }
-        // Settings
+        // Bottom Left: Settings
         if (t.clientX < w * 0.2 && t.clientY > h * 0.8) {
             openSettings(); return;
         }
     }
     document.body.dataset.lastTap = now;
 
+    // 3x3 Grid Logic
     if (magicModeActive && forceCount < 2) {
         const digit = getGridDigit(t.clientX, t.clientY, w, h);
         inputBuffer += digit;
@@ -89,19 +96,23 @@ document.addEventListener('touchstart', (e) => {
 });
 
 function getGridDigit(x, y, w, h) {
-    const wrapper = document.querySelector('.content-wrapper');
-    const rect = wrapper.getBoundingClientRect();
+    const rect = swiperEl.getBoundingClientRect();
+    
+    // Outside the black box = 0
     if (y < rect.top || y > rect.bottom) return "0";
+    
+    // Inside the black box = 1-9
     const col = Math.floor((x / w) * 3);
     const row = Math.floor(((y - rect.top) / rect.height) * 3);
     const digit = (row * 3) + col + 1;
+    
     return (digit > 9 || digit < 1) ? "0" : digit.toString();
 }
 
 function applyGlobalForce(position) {
     const targetIdx = Math.min(Math.max(position - 1, 0), 49);
     
-    // 1. Restore previous forced index for this slot if it exists
+    // Restore original words for this force slot (1st or 2nd)
     if (forcedIndices[forceCount] !== null) {
         const oldIdx = forcedIndices[forceCount];
         allLists.forEach((list, i) => {
@@ -109,23 +120,20 @@ function applyGlobalForce(position) {
         });
     }
 
-    // 2. Set the new force
+    // Apply new force to all lists
     forcedIndices[forceCount] = targetIdx;
     allLists.forEach((list) => {
         list.items[targetIdx] = list.forceWords[forceCount];
     });
 
-    // 3. Update the UI on all slides immediately
     updateUI();
 }
 
 function updateUI() {
-    // We target all slides (including swiper clones)
     document.querySelectorAll('.swiper-slide').forEach((slide) => {
         const sIdx = parseInt(slide.getAttribute('data-swiper-slide-index'));
         if (!isNaN(sIdx)) {
             const listData = allLists[sIdx];
-            // Update every item in the DOM to match current data state
             listData.items.forEach((item, itemIdx) => {
                 const el = slide.querySelector(`[data-pos="${itemIdx}"]`);
                 if (el) el.innerText = `${itemIdx + 1}. ${item}`;
@@ -158,3 +166,4 @@ document.getElementById('close-settings').onclick = () => {
     settingsPage.style.display = 'none';
     initApp();
 };
+
