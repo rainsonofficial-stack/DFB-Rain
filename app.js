@@ -1,5 +1,6 @@
 // 4. PERSISTENT MEMORY LOGIC
 const listKey = 'user_list_order';
+const forceKey = 'user_forced_indices'; // New key for force storage
 const master = [movieData, cardData, objectData];
 let savedNames = JSON.parse(localStorage.getItem(listKey));
 
@@ -7,7 +8,8 @@ let savedNames = JSON.parse(localStorage.getItem(listKey));
 let allLists = savedNames ? savedNames.map(name => master.find(l => l.title === name)) : master;
 
 const originalItems = allLists.map(list => [...list.items]);
-let forcedIndices = [null, null]; 
+// Updated: Load saved forced indices or default to [null, null]
+let forcedIndices = JSON.parse(localStorage.getItem(forceKey)) || [null, null]; 
 
 const container = document.getElementById('app-container');
 const gallery = document.getElementById('gallery-overlay');
@@ -27,6 +29,15 @@ gallery.addEventListener('click', () => {
 });
 
 function initApp() {
+    // NEW: Apply saved forces to the items before rendering
+    forcedIndices.forEach((savedIdx, fCount) => {
+        if (savedIdx !== null) {
+            allLists.forEach((list) => {
+                list.items[savedIdx] = list.forceWords[fCount];
+            });
+        }
+    });
+
     container.innerHTML = '';
     allLists.forEach((list) => {
         const slide = document.createElement('div');
@@ -110,13 +121,20 @@ function getGridDigit(x, y, w, h) {
 
 function applyGlobalForce(position) {
     const targetIdx = Math.min(Math.max(position - 1, 0), 49);
+    
+    // Restore original word at previous position for all lists
     if (forcedIndices[forceCount] !== null) {
         const oldIdx = forcedIndices[forceCount];
         allLists.forEach((list, i) => {
             list.items[oldIdx] = originalItems[i][oldIdx];
         });
     }
+
+    // Update index and save to LocalStorage
     forcedIndices[forceCount] = targetIdx;
+    localStorage.setItem(forceKey, JSON.stringify(forcedIndices));
+
+    // Apply new force word
     allLists.forEach((list) => {
         list.items[targetIdx] = list.forceWords[forceCount];
     });
