@@ -1,14 +1,11 @@
 // 4. PERSISTENT MEMORY LOGIC
 const listKey = 'user_list_order';
-const forceKey = 'user_forced_indices'; // New key for force storage
+const forceKey = 'user_forced_indices';
 const master = [movieData, cardData, objectData];
 let savedNames = JSON.parse(localStorage.getItem(listKey));
 
-// Load order from memory or default to master
 let allLists = savedNames ? savedNames.map(name => master.find(l => l.title === name)) : master;
-
 const originalItems = allLists.map(list => [...list.items]);
-// Updated: Load saved forced indices or default to [null, null]
 let forcedIndices = JSON.parse(localStorage.getItem(forceKey)) || [null, null]; 
 
 const container = document.getElementById('app-container');
@@ -21,15 +18,51 @@ let swiperInstance;
 let magicModeActive = false; 
 let inputBuffer = "";
 let forceCount = 0;
+let isUpsideDown = false; 
 
 gallery.addEventListener('click', () => {
     gallery.style.display = 'none';
     swiperEl.style.display = 'block';
+
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        DeviceOrientationEvent.requestPermission()
+            .then(response => {
+                if (response === 'granted') {
+                    window.addEventListener('deviceorientation', handleFlip);
+                }
+            })
+            .catch(err => console.error('Motion permission denied', err));
+    } else {
+        window.addEventListener('deviceorientation', handleFlip);
+    }
     initApp();
 });
 
+function handleFlip(event) {
+    const tilt = Math.abs(event.beta);
+    if (tilt > 160 && !isUpsideDown) {
+        isUpsideDown = true;
+        toggleMagicMode(); 
+    } else if (tilt < 100 && isUpsideDown) {
+        isUpsideDown = false; 
+    }
+}
+
+function toggleMagicMode() {
+    magicModeActive = !magicModeActive;
+    inputBuffer = "";
+    forceCount = 0; 
+    
+    if (magicModeActive) {
+        indicator.classList.add('active');
+        if (navigator.vibrate) navigator.vibrate(60);
+    } else {
+        indicator.classList.remove('active');
+        if (navigator.vibrate) navigator.vibrate([30, 30]);
+    }
+}
+
 function initApp() {
-    // NEW: Apply saved forces to the items before rendering
     forcedIndices.forEach((savedIdx, fCount) => {
         if (savedIdx !== null) {
             allLists.forEach((list) => {
@@ -70,16 +103,7 @@ document.addEventListener('touchstart', (e) => {
 
     if (now - lastTap < 300) {
         if (t.clientX > w * 0.8 && t.clientY > h * 0.8) {
-            magicModeActive = !magicModeActive;
-            inputBuffer = "";
-            forceCount = 0; 
-            if (magicModeActive) {
-                indicator.classList.add('active');
-                if (navigator.vibrate) navigator.vibrate(60);
-            } else {
-                indicator.classList.remove('active');
-                if (navigator.vibrate) navigator.vibrate([30, 30]);
-            }
+            toggleMagicMode();
             return;
         }
         if (t.clientX < w * 0.2 && t.clientY > h * 0.8) {
@@ -121,20 +145,14 @@ function getGridDigit(x, y, w, h) {
 
 function applyGlobalForce(position) {
     const targetIdx = Math.min(Math.max(position - 1, 0), 49);
-    
-    // Restore original word at previous position for all lists
     if (forcedIndices[forceCount] !== null) {
         const oldIdx = forcedIndices[forceCount];
         allLists.forEach((list, i) => {
             list.items[oldIdx] = originalItems[i][oldIdx];
         });
     }
-
-    // Update index and save to LocalStorage
     forcedIndices[forceCount] = targetIdx;
     localStorage.setItem(forceKey, JSON.stringify(forcedIndices));
-
-    // Apply new force word
     allLists.forEach((list) => {
         list.items[targetIdx] = list.forceWords[forceCount];
     });
@@ -169,7 +187,6 @@ function openSettings() {
 window.moveList = (i) => {
     if (i > 0) {
         [allLists[i], allLists[i-1]] = [allLists[i-1], allLists[i]];
-        // SAVE TO STORAGE
         localStorage.setItem(listKey, JSON.stringify(allLists.map(l => l.title)));
         openSettings();
     }
@@ -179,6 +196,7 @@ document.getElementById('close-settings').onclick = () => {
     settingsPage.style.display = 'none';
     initApp();
 };
+
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js')
