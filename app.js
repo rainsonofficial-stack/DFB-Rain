@@ -1,36 +1,35 @@
 // 4. PERSISTENT MEMORY LOGIC
 const listKey = 'user_list_order';
-const forceKey = 'user_forced_indices';
+const forceKey = 'user_forced_indices_v2'; // Updated key for independent list forces
 
-// This is your Master List - Keep adding new ones here!
 const master = [movieData, cardData, objectData, vacationData, songData];
 
 let savedNames = JSON.parse(localStorage.getItem(listKey));
-let allLists = [];
+let allLists;
 
-// SMART SYNC: This part prevents the freeze
-if (!savedNames || !Array.isArray(savedNames)) {
+if (!savedNames) {
     allLists = [...master];
 } else {
-    // 1. Only load lists that actually exist in your code
     allLists = savedNames
         .map(name => master.find(l => l && l.title === name))
         .filter(Boolean);
-
-    // 2. If a new list (like Songs) is in master but NOT in memory, add it
     master.forEach(m => {
         if (!allLists.some(a => a.title === m.title)) {
             allLists.push(m);
         }
     });
 }
-
-// Ensure memory is updated with the new merged list immediately
 localStorage.setItem(listKey, JSON.stringify(allLists.map(l => l.title)));
 
 const originalItems = allLists.map(list => [...list.items]);
-let forcedIndices = JSON.parse(localStorage.getItem(forceKey)) || [null, null];
 
+// Load forces as an object: { "Movies": [idx1, idx2], "Songs": [idx1, idx2] }
+let forcedIndicesMap = JSON.parse(localStorage.getItem(forceKey)) || {};
+
+// Ensure every list has an entry in the map
+allLists.forEach(l => {
+    if (!forcedIndicesMap[l.title]) forcedIndicesMap[l.title] = [null, null];
+});
 
 const container = document.getElementById('app-container');
 const gallery = document.getElementById('gallery-overlay');
@@ -87,12 +86,14 @@ function toggleMagicMode() {
 }
 
 function initApp() {
-    forcedIndices.forEach((savedIdx, fCount) => {
-        if (savedIdx !== null) {
-            allLists.forEach((list) => {
+    // Apply independent forces for each list
+    allLists.forEach((list) => {
+        const indices = forcedIndicesMap[list.title];
+        indices.forEach((savedIdx, fCount) => {
+            if (savedIdx !== null) {
                 list.items[savedIdx] = list.forceWords[fCount];
-            });
-        }
+            }
+        });
     });
 
     container.innerHTML = '';
@@ -112,24 +113,18 @@ function initApp() {
         container.appendChild(slide);
     });
 
-        if (swiperInstance) swiperInstance.destroy();
+    if (swiperInstance) swiperInstance.destroy();
     swiperInstance = new Swiper('.swiper', { 
         loop: true,
-        // SENSITIVITY FIXES
-        threshold: 2,           // Detects swipe almost instantly
-        longSwipesRatio: 0.1,   // Move only 10% to change page (prevents sliding back)
-        
-        // SINGLE SLIDE LOCKS
-        speed: 400,             // Smooth transition speed in milliseconds
-        shortSwipes: true,      // Allows quick flicks...
-        followFinger: true,     // ...but keeps the slide glued to your finger
-        touchMoveStopPropagation: true, // Prevents "momentum" from bleeding into next slide
-        
-        // This is the key for preventing double-slides
+        threshold: 2,           
+        longSwipesRatio: 0.1,   
+        speed: 400,             
+        shortSwipes: true,      
+        followFinger: true,     
+        touchMoveStopPropagation: true, 
         slidesPerGroup: 1,      
         touchReleaseOnEdges: true
     });
-
 }
 
 document.addEventListener('touchstart', (e) => {
@@ -185,17 +180,19 @@ function getGridDigit(x, y, w, h) {
 
 function applyGlobalForce(position) {
     const targetIdx = Math.min(Math.max(position - 1, 0), 49);
-    if (forcedIndices[forceCount] !== null) {
-        const oldIdx = forcedIndices[forceCount];
-        allLists.forEach((list, i) => {
-            list.items[oldIdx] = originalItems[i][oldIdx];
-        });
+    const activeIndex = swiperInstance.realIndex;
+    const activeList = allLists[activeIndex];
+    const listOriginals = originalItems[activeIndex];
+
+    // Reset previous word if exists
+    if (forcedIndicesMap[activeList.title][forceCount] !== null) {
+        const oldIdx = forcedIndicesMap[activeList.title][forceCount];
+        activeList.items[oldIdx] = listOriginals[oldIdx];
     }
-    forcedIndices[forceCount] = targetIdx;
-    localStorage.setItem(forceKey, JSON.stringify(forcedIndices));
-    allLists.forEach((list) => {
-        list.items[targetIdx] = list.forceWords[forceCount];
-    });
+
+    forcedIndicesMap[activeList.title][forceCount] = targetIdx;
+    localStorage.setItem(forceKey, JSON.stringify(forcedIndicesMap));
+    activeList.items[targetIdx] = activeList.forceWords[forceCount];
     updateUI();
 }
 
@@ -214,11 +211,21 @@ function updateUI() {
 
 function openSettings() {
     const sList = document.getElementById('settings-list');
-    sList.innerHTML = '<h2>List Order</h2>';
+    sList.innerHTML = '<h2>List Order & Forces</h2>';
     allLists.forEach((l, i) => {
         const item = document.createElement('div');
         item.className = 'settings-item';
-        item.innerHTML = `<span>${l.title}</span> <button onclick="moveList(${i})">UP ↑</button>`;
+        item.style.flexDirection = 'column';
+        item.innerHTML = `
+            <div style="display:flex; justify-content:space-between; width:100%;">
+                <span>${l.title}</span>
+                <button onclick="moveList(${i})">UP ↑</button>
+            </div>
+            <div style="font-size:11px; margin-top:5px; color:#888; display:flex; justify-content:space-between; align-items:center; width:100%;">
+                <span>1: ${l.forceWords[0]} | 2: ${l.forceWords[1]}</span>
+                <button onclick="swapForces('${l.title}')" style="font-size:9px; padding:2px 5px;">SWAP</button>
+            </div>
+        `;
         sList.appendChild(item);
     });
     settingsPage.style.display = 'flex';
@@ -227,14 +234,27 @@ function openSettings() {
 window.moveList = (i) => {
     if (i > 0) {
         [allLists[i], allLists[i-1]] = [allLists[i-1], allLists[i]];
-        // ADD THIS LINE BELOW:
         [originalItems[i], originalItems[i-1]] = [originalItems[i-1], originalItems[i]];
-        
         localStorage.setItem(listKey, JSON.stringify(allLists.map(l => l.title)));
         openSettings();
     }
 };
 
+window.swapForces = (title) => {
+    const list = master.find(l => l.title === title);
+    if (list) {
+        // Swap word order in data
+        [list.forceWords[0], list.forceWords[1]] = [list.forceWords[1], list.forceWords[0]];
+        
+        // Swap saved index positions so words move with their slots
+        const indices = forcedIndicesMap[title];
+        [indices[0], indices[1]] = [indices[1], indices[0]];
+        
+        localStorage.setItem(forceKey, JSON.stringify(forcedIndicesMap));
+        if (navigator.vibrate) navigator.vibrate(30);
+        openSettings();
+    }
+};
 
 document.getElementById('close-settings').onclick = () => {
     settingsPage.style.display = 'none';
@@ -248,3 +268,4 @@ if ('serviceWorker' in navigator) {
       .catch(err => console.log('Service Worker Failed', err));
   });
 }
+
