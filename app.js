@@ -88,8 +88,24 @@ function initApp() {
         container.appendChild(slide);
     });
 
-    if (swiperInstance) swiperInstance.destroy();
-    swiperInstance = new Swiper('.swiper', { loop: true });
+        if (swiperInstance) swiperInstance.destroy();
+    swiperInstance = new Swiper('.swiper', { 
+        loop: true,
+        // SENSITIVITY FIXES
+        threshold: 2,           // Detects swipe almost instantly
+        longSwipesRatio: 0.1,   // Move only 10% to change page (prevents sliding back)
+        
+        // SINGLE SLIDE LOCKS
+        speed: 400,             // Smooth transition speed in milliseconds
+        shortSwipes: true,      // Allows quick flicks...
+        followFinger: true,     // ...but keeps the slide glued to your finger
+        touchMoveStopPropagation: true, // Prevents "momentum" from bleeding into next slide
+        
+        // This is the key for preventing double-slides
+        slidesPerGroup: 1,      
+        touchReleaseOnEdges: true
+    });
+
 }
 
 document.addEventListener('touchstart', (e) => {
