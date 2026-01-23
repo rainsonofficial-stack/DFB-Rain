@@ -59,7 +59,7 @@ html, body {
 /* 2. BEEFY SAVE BUTTON - UPDATED SIZE ONLY */
 .close-btn {
     margin-top: auto; 
-    height: 100px; /* Updated to be even thicker */
+    height: 70px; /* Updated to be even thicker */
     flex-shrink: 0; /* Ensures height is strictly maintained */
     background: #fff; color: #000;
     font-weight: 900; border: none; 
