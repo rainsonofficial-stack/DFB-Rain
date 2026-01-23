@@ -1,7 +1,7 @@
 // 4. PERSISTENT MEMORY LOGIC
 const listKey = 'user_list_order';
 const forceKey = 'user_forced_indices';
-const master = [movieData, cardData, objectData];
+const master = [movieData, cardData, objectData, vacationData];
 let savedNames = JSON.parse(localStorage.getItem(listKey));
 
 let allLists = savedNames ? savedNames.map(name => master.find(l => l.title === name)) : master;
