@@ -105,3 +105,17 @@ html, body {
 .indicator.active {
     opacity: 1;
 }
+.swap-btn {
+    background: #444;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+.swap-btn:active {
+    background: #ffcc00;
+    color: black;
+}
