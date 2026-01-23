@@ -1,9 +1,14 @@
-const CACHE_NAME = 'grid-app-v1';
+const CACHE_NAME = 'grid-app-v2'; // Incremented version to refresh cache
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './style.css',
   './app.js',
+  './movie.js',      // Added
+  './card.js',       // Added
+  './object.js',     // Added
+  './vacation.js',   // Added
+  './song.js',       // Added
   './manifest.json',
   './background.jpg',
   './gallery.jpg',
@@ -21,11 +26,10 @@ self.addEventListener('install', (event) => {
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
-  // Force the waiting service worker to become the active service worker
   self.skipWaiting();
 });
 
-// 2. Activate Phase: Clean up old caches if you update versions
+// 2. Activate Phase: Clean up old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -50,4 +54,3 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
-
