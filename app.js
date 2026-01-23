@@ -231,7 +231,10 @@ function openSettings() {
         item.innerHTML = `
             <div style="display:flex; justify-content:space-between; width:100%;">
                 <span>${l.title}</span>
-                <button onclick="moveList(${i})">UP ↑</button>
+                <div style="display:flex; gap:5px;">
+                    <button onclick="moveList(${i})">UP ↑</button>
+                    <button onclick="moveListDown(${i})">DN ↓</button>
+                </div>
             </div>
             <div style="font-size:11px; margin-top:5px; color:#888; display:flex; justify-content:space-between; align-items:center; width:100%;">
                 <span>1: ${l.forceWords[0]} | 2: ${l.forceWords[1]}</span>
@@ -252,6 +255,15 @@ window.moveList = (i) => {
     }
 };
 
+window.moveListDown = (i) => {
+    if (i < allLists.length - 1) {
+        [allLists[i], allLists[i+1]] = [allLists[i+1], allLists[i]];
+        [originalItems[i], originalItems[i+1]] = [originalItems[i+1], originalItems[i]];
+        localStorage.setItem(listKey, JSON.stringify(allLists.map(l => l.title)));
+        openSettings();
+    }
+};
+
 window.swapForces = (title) => {
     const list = master.find(l => l.title === title);
     if (list) {
@@ -259,11 +271,9 @@ window.swapForces = (title) => {
         const indices = forcedIndicesMap[title];
         [indices[0], indices[1]] = [indices[1], indices[0]];
         
-        // --- NEW: SAVE WORD ORDER ---
         let orders = JSON.parse(localStorage.getItem(wordOrderKey)) || {};
         orders[title] = list.forceWords;
         localStorage.setItem(wordOrderKey, JSON.stringify(orders));
-        // ----------------------------
 
         localStorage.setItem(forceKey, JSON.stringify(forcedIndicesMap));
         if (navigator.vibrate) navigator.vibrate(30);
