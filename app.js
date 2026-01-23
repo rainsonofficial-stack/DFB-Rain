@@ -1,12 +1,34 @@
 // 4. PERSISTENT MEMORY LOGIC
 const listKey = 'user_list_order';
 const forceKey = 'user_forced_indices';
-const master = [movieData, cardData, objectData, vacationData];
-let savedNames = JSON.parse(localStorage.getItem(listKey));
 
-let allLists = savedNames ? savedNames.map(name => master.find(l => l.title === name)) : master;
+// This is your master list of all data files
+const master = [movieData, cardData, objectData, vacationData];
+
+let savedNames = JSON.parse(localStorage.getItem(listKey));
+let allLists;
+
+if (!savedNames) {
+    // First time ever opening the app
+    allLists = [...master];
+} else {
+    // Returning user: Load saved order, but filter out any errors
+    allLists = savedNames
+        .map(name => master.find(l => l && l.title === name))
+        .filter(Boolean);
+
+    // FUTURE-PROOF: If a new list (like vacationData) exists in code 
+    // but not in memory, add it to the end automatically.
+    master.forEach(m => {
+        if (!allLists.some(a => a.title === m.title)) {
+            allLists.push(m);
+        }
+    });
+}
+
 const originalItems = allLists.map(list => [...list.items]);
-let forcedIndices = JSON.parse(localStorage.getItem(forceKey)) || [null, null]; 
+let forcedIndices = JSON.parse(localStorage.getItem(forceKey)) || [null, null];
+
 
 const container = document.getElementById('app-container');
 const gallery = document.getElementById('gallery-overlay');
