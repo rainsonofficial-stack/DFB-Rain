@@ -203,10 +203,14 @@ function openSettings() {
 window.moveList = (i) => {
     if (i > 0) {
         [allLists[i], allLists[i-1]] = [allLists[i-1], allLists[i]];
+        // ADD THIS LINE BELOW:
+        [originalItems[i], originalItems[i-1]] = [originalItems[i-1], originalItems[i]];
+        
         localStorage.setItem(listKey, JSON.stringify(allLists.map(l => l.title)));
         openSettings();
     }
 };
+
 
 document.getElementById('close-settings').onclick = () => {
     settingsPage.style.display = 'none';
