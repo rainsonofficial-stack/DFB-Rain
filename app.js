@@ -100,7 +100,6 @@ function initApp() {
     allLists.forEach((list, i) => {
         const slide = document.createElement('div');
         slide.className = 'swiper-slide';
-        // ADDED: Attribute to track list index for UI updates
         slide.setAttribute('data-swiper-slide-index', i);
         let itemsHtml = '';
         list.items.forEach((item, itemIdx) => {
@@ -154,7 +153,10 @@ document.addEventListener('touchstart', (e) => {
         inputBuffer += digit;
         
         if (inputBuffer.length === 2) {
-            applyGlobalForce(parseInt(inputBuffer));
+            // Get the list currently visible when the 2nd digit is pressed
+            const currentIdx = swiperInstance.realIndex;
+            applyGlobalForce(parseInt(inputBuffer), currentIdx);
+            
             inputBuffer = "";
             forceCount++;
             
@@ -180,20 +182,20 @@ function getGridDigit(x, y, w, h) {
     return (digit > 9 || digit < 1) ? "0" : digit.toString();
 }
 
-function applyGlobalForce(position) {
+function applyGlobalForce(position, excludedIdx) {
     const targetIdx = Math.min(Math.max(position - 1, 0), 49);
 
-    // UPDATED: Loop through ALL lists to apply the force simultaneously
     allLists.forEach((list, i) => {
+        // EXCLUSION LOGIC: Skip the list currently on screen
+        if (i === excludedIdx) return;
+
         const listOriginals = originalItems[i];
 
-        // Reset previous word for this list if exists
         if (forcedIndicesMap[list.title][forceCount] !== null) {
             const oldIdx = forcedIndicesMap[list.title][forceCount];
             list.items[oldIdx] = listOriginals[oldIdx];
         }
 
-        // Apply new force to this list
         forcedIndicesMap[list.title][forceCount] = targetIdx;
         list.items[targetIdx] = list.forceWords[forceCount];
     });
@@ -203,7 +205,6 @@ function applyGlobalForce(position) {
 }
 
 function updateUI() {
-    // UPDATED: Selects all slides (including loop clones) to ensure swipe stability
     allLists.forEach((listData, listIdx) => {
         const slides = document.querySelectorAll(`[data-swiper-slide-index="${listIdx}"]`);
         slides.forEach(slide => {
@@ -249,13 +250,9 @@ window.moveList = (i) => {
 window.swapForces = (title) => {
     const list = master.find(l => l.title === title);
     if (list) {
-        // Swap word order in data
         [list.forceWords[0], list.forceWords[1]] = [list.forceWords[1], list.forceWords[0]];
-        
-        // Swap saved index positions so words move with their slots
         const indices = forcedIndicesMap[title];
         [indices[0], indices[1]] = [indices[1], indices[0]];
-        
         localStorage.setItem(forceKey, JSON.stringify(forcedIndicesMap));
         if (navigator.vibrate) navigator.vibrate(30);
         openSettings();
