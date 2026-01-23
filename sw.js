@@ -1,4 +1,4 @@
-const CACHE_NAME = 'grid-app-v2'; // Incremented version to refresh cache
+const CACHE_NAME = 'grid-app-v3'; // Incremented version to refresh cache
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
