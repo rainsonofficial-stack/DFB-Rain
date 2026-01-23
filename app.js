@@ -1,6 +1,7 @@
 // 4. PERSISTENT MEMORY LOGIC
 const listKey = 'user_list_order';
-const forceKey = 'user_forced_indices_v2'; // Updated key for independent list forces
+const forceKey = 'user_forced_indices_v2'; 
+const wordOrderKey = 'user_word_order'; // NEW: To remember the SWAP state
 
 const master = [movieData, cardData, objectData, vacationData, songData];
 
@@ -21,12 +22,19 @@ if (!savedNames) {
 }
 localStorage.setItem(listKey, JSON.stringify(allLists.map(l => l.title)));
 
+// --- NEW: LOAD SAVED WORD ORDER ---
+let savedWordOrders = JSON.parse(localStorage.getItem(wordOrderKey)) || {};
+allLists.forEach(list => {
+    if (savedWordOrders[list.title]) {
+        list.forceWords = savedWordOrders[list.title];
+    }
+});
+// ----------------------------------
+
 const originalItems = allLists.map(list => [...list.items]);
 
-// Load forces as an object: { "Movies": [idx1, idx2], "Songs": [idx1, idx2] }
 let forcedIndicesMap = JSON.parse(localStorage.getItem(forceKey)) || {};
 
-// Ensure every list has an entry in the map
 allLists.forEach(l => {
     if (!forcedIndicesMap[l.title]) forcedIndicesMap[l.title] = [null, null];
 });
@@ -86,7 +94,6 @@ function toggleMagicMode() {
 }
 
 function initApp() {
-    // Apply independent forces for each list
     allLists.forEach((list) => {
         const indices = forcedIndicesMap[list.title];
         indices.forEach((savedIdx, fCount) => {
@@ -153,7 +160,6 @@ document.addEventListener('touchstart', (e) => {
         inputBuffer += digit;
         
         if (inputBuffer.length === 2) {
-            // Get the list currently visible when the 2nd digit is pressed
             const currentIdx = swiperInstance.realIndex;
             applyGlobalForce(parseInt(inputBuffer), currentIdx);
             
@@ -186,7 +192,6 @@ function applyGlobalForce(position, excludedIdx) {
     const targetIdx = Math.min(Math.max(position - 1, 0), 49);
 
     allLists.forEach((list, i) => {
-        // EXCLUSION LOGIC: Skip the list currently on screen
         if (i === excludedIdx) return;
 
         const listOriginals = originalItems[i];
@@ -253,6 +258,13 @@ window.swapForces = (title) => {
         [list.forceWords[0], list.forceWords[1]] = [list.forceWords[1], list.forceWords[0]];
         const indices = forcedIndicesMap[title];
         [indices[0], indices[1]] = [indices[1], indices[0]];
+        
+        // --- NEW: SAVE WORD ORDER ---
+        let orders = JSON.parse(localStorage.getItem(wordOrderKey)) || {};
+        orders[title] = list.forceWords;
+        localStorage.setItem(wordOrderKey, JSON.stringify(orders));
+        // ----------------------------
+
         localStorage.setItem(forceKey, JSON.stringify(forcedIndicesMap));
         if (navigator.vibrate) navigator.vibrate(30);
         openSettings();
@@ -271,3 +283,4 @@ if ('serviceWorker' in navigator) {
       .catch(err => console.log('Service Worker Failed', err));
   });
 }
+
