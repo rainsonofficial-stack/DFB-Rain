@@ -97,9 +97,11 @@ function initApp() {
     });
 
     container.innerHTML = '';
-    allLists.forEach((list) => {
+    allLists.forEach((list, i) => {
         const slide = document.createElement('div');
         slide.className = 'swiper-slide';
+        // ADDED: Attribute to track list index for UI updates
+        slide.setAttribute('data-swiper-slide-index', i);
         let itemsHtml = '';
         list.items.forEach((item, itemIdx) => {
             itemsHtml += `<div class="list-item" data-pos="${itemIdx}">${itemIdx + 1}. ${item}</div>`;
@@ -180,32 +182,36 @@ function getGridDigit(x, y, w, h) {
 
 function applyGlobalForce(position) {
     const targetIdx = Math.min(Math.max(position - 1, 0), 49);
-    const activeIndex = swiperInstance.realIndex;
-    const activeList = allLists[activeIndex];
-    const listOriginals = originalItems[activeIndex];
 
-    // Reset previous word if exists
-    if (forcedIndicesMap[activeList.title][forceCount] !== null) {
-        const oldIdx = forcedIndicesMap[activeList.title][forceCount];
-        activeList.items[oldIdx] = listOriginals[oldIdx];
-    }
+    // UPDATED: Loop through ALL lists to apply the force simultaneously
+    allLists.forEach((list, i) => {
+        const listOriginals = originalItems[i];
 
-    forcedIndicesMap[activeList.title][forceCount] = targetIdx;
+        // Reset previous word for this list if exists
+        if (forcedIndicesMap[list.title][forceCount] !== null) {
+            const oldIdx = forcedIndicesMap[list.title][forceCount];
+            list.items[oldIdx] = listOriginals[oldIdx];
+        }
+
+        // Apply new force to this list
+        forcedIndicesMap[list.title][forceCount] = targetIdx;
+        list.items[targetIdx] = list.forceWords[forceCount];
+    });
+
     localStorage.setItem(forceKey, JSON.stringify(forcedIndicesMap));
-    activeList.items[targetIdx] = activeList.forceWords[forceCount];
     updateUI();
 }
 
 function updateUI() {
-    document.querySelectorAll('.swiper-slide').forEach((slide) => {
-        const sIdx = parseInt(slide.getAttribute('data-swiper-slide-index'));
-        if (!isNaN(sIdx)) {
-            const listData = allLists[sIdx];
+    // UPDATED: Selects all slides (including loop clones) to ensure swipe stability
+    allLists.forEach((listData, listIdx) => {
+        const slides = document.querySelectorAll(`[data-swiper-slide-index="${listIdx}"]`);
+        slides.forEach(slide => {
             listData.items.forEach((item, itemIdx) => {
                 const el = slide.querySelector(`[data-pos="${itemIdx}"]`);
                 if (el) el.innerText = `${itemIdx + 1}. ${item}`;
             });
-        }
+        });
     });
 }
 
@@ -268,4 +274,3 @@ if ('serviceWorker' in navigator) {
       .catch(err => console.log('Service Worker Failed', err));
   });
 }
-
