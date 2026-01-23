@@ -1,14 +1,14 @@
-const CACHE_NAME = 'grid-app-v3'; // Incremented version to refresh cache
+const CACHE_NAME = 'grid-app-v4'; // Increment version
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './style.css',
   './app.js',
-  './movie.js',      // Added
-  './card.js',       // Added
-  './object.js',     // Added
-  './vacation.js',   // Added
-  './song.js',       // Added
+  './movie.js',
+  './card.js',
+  './object.js',
+  './vacation.js',
+  './song.js',
   './manifest.json',
   './background.jpg',
   './gallery.jpg',
@@ -18,39 +18,31 @@ const ASSETS_TO_CACHE = [
   'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js'
 ];
 
-// 1. Install Phase: Save everything to the cache
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log('Caching app assets');
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE))
   );
   self.skipWaiting();
 });
 
-// 2. Activate Phase: Clean up old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cache) => {
-          if (cache !== CACHE_NAME) {
-            console.log('Clearing old cache');
-            return caches.delete(cache);
-          }
-        })
-      );
-    })
+    caches.keys().then((keys) => Promise.all(
+      keys.map((k) => k !== CACHE_NAME && caches.delete(k))
+    ))
   );
   return self.clients.claim();
 });
 
-// 3. Fetch Phase: Serve from cache first, then network
+// IMPROVED FETCH: Cache-First for Images
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
+    caches.match(event.request).then((cachedResponse) => {
+      // If found in cache, return it immediately without network ping
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+      return fetch(event.request);
     })
   );
 });
