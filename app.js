@@ -3,7 +3,7 @@ const listKey = 'user_list_order';
 const forceKey = 'user_forced_indices';
 
 // This is your master list of all data files
-const master = [movieData, cardData, objectData, vacationData];
+const master = [movieData, cardData, objectData, vacationData, songData];
 
 let savedNames = JSON.parse(localStorage.getItem(listKey));
 let allLists;
