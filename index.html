@@ -8,10 +8,27 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#000000">
 
+    <link rel="preload" as="image" href="background.jpg">
+
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Utility">
     <link rel="apple-touch-icon" href="icon-192.png">
+
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            background-image: url('background.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            height: 100%;
+            width: 100%;
+        }
+    </style>
 
     <link rel="stylesheet" href="style.css?v=3">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
@@ -39,16 +56,26 @@
     <script src="objects.js?v=3"></script>
     <script src="vacation.js?v=1"></script>
     <script src="song.js?v=1"></script>
-    
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-    
     <script src="app.js?v=3"></script>
 
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('SW Registered'))
+                    .then(reg => {
+                        console.log('SW Registered');
+                        // Check for updates automatically
+                        reg.onupdatefound = () => {
+                            const installingWorker = reg.installing;
+                            installingWorker.onstatechange = () => {
+                                if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // New content available, refresh to activate
+                                    window.location.reload();
+                                }
+                            };
+                        };
+                    })
                     .catch(err => console.log('SW Failed', err));
             });
         }
