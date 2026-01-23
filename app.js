@@ -2,29 +2,31 @@
 const listKey = 'user_list_order';
 const forceKey = 'user_forced_indices';
 
-// This is your master list of all data files
+// This is your Master List - Keep adding new ones here!
 const master = [movieData, cardData, objectData, vacationData, songData];
 
 let savedNames = JSON.parse(localStorage.getItem(listKey));
-let allLists;
+let allLists = [];
 
-if (!savedNames) {
-    // First time ever opening the app
+// SMART SYNC: This part prevents the freeze
+if (!savedNames || !Array.isArray(savedNames)) {
     allLists = [...master];
 } else {
-    // Returning user: Load saved order, but filter out any errors
+    // 1. Only load lists that actually exist in your code
     allLists = savedNames
         .map(name => master.find(l => l && l.title === name))
         .filter(Boolean);
 
-    // FUTURE-PROOF: If a new list (like vacationData) exists in code 
-    // but not in memory, add it to the end automatically.
+    // 2. If a new list (like Songs) is in master but NOT in memory, add it
     master.forEach(m => {
         if (!allLists.some(a => a.title === m.title)) {
             allLists.push(m);
         }
     });
 }
+
+// Ensure memory is updated with the new merged list immediately
+localStorage.setItem(listKey, JSON.stringify(allLists.map(l => l.title)));
 
 const originalItems = allLists.map(list => [...list.items]);
 let forcedIndices = JSON.parse(localStorage.getItem(forceKey)) || [null, null];
