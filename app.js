@@ -3,7 +3,7 @@ const listKey = 'user_list_order';
 const forceKey = 'user_forced_indices_v2'; 
 const wordOrderKey = 'user_word_order'; // NEW: To remember the SWAP state
 
-const master = [movieData, cardData, objectData, vacationData, songData];
+const master = [movieData, cardData, objectData, vacationData, songData, fifaData];
 
 let savedNames = JSON.parse(localStorage.getItem(listKey));
 let allLists;
