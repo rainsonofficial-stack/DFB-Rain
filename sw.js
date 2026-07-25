@@ -9,6 +9,7 @@ const ASSETS_TO_CACHE = [
   './object.js',
   './vacation.js',
   './song.js',
+  './fifa.js',
   './manifest.json',
   './background.jpg',
   './gallery.jpg',
