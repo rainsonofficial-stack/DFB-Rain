@@ -28,6 +28,17 @@
             height: 100%;
             width: 100%;
         }
+
+        /* NEW: top-left back tap zone (active only while list view is open) */
+        .back-zone {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100px;
+            height: 100px;
+            z-index: 9999;
+            /* background: rgba(255,0,0,0.15); */ /* uncomment to visualize while testing */
+        }
     </style>
 
     <link rel="stylesheet" href="style.css?v=3">
@@ -45,6 +56,9 @@
 
     <div id="indicator" class="indicator"></div>
 
+    <!-- NEW: back tap zone -->
+    <div id="back-zone" class="back-zone"></div>
+
     <div id="settings-page" class="settings-page">
         <div class="settings-header">SETTINGS</div>
         <div id="settings-list"></div>
@@ -58,7 +72,7 @@
     <script src="song.js?v=1"></script>
     <script src="fifa.js?v=1"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-    <script src="app.js?v=3"></script>
+    <script src="app.js?v=4"></script>
 
     <script>
         if ('serviceWorker' in navigator) {
