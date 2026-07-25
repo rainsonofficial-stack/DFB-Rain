@@ -44,6 +44,7 @@ const gallery = document.getElementById('gallery-overlay');
 const swiperEl = document.querySelector('.swiper');
 const indicator = document.getElementById('indicator');
 const settingsPage = document.getElementById('settings-page');
+const backZone = document.getElementById('back-zone'); // NEW
 
 let swiperInstance;
 let magicModeActive = false; 
@@ -51,9 +52,14 @@ let inputBuffer = "";
 let forceCount = 0;
 let isUpsideDown = false; 
 
-gallery.addEventListener('click', () => {
+// NEW: set the baseline history state so back-button/back-zone have somewhere to return to
+history.replaceState({ view: 'gallery' }, '');
+
+// NEW: opens the list view (used by gallery tap)
+function showList() {
     gallery.style.display = 'none';
     swiperEl.style.display = 'block';
+    history.pushState({ view: 'list' }, '');
 
     if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
         DeviceOrientationEvent.requestPermission()
@@ -67,6 +73,35 @@ gallery.addEventListener('click', () => {
         window.addEventListener('deviceorientation', handleFlip);
     }
     initApp();
+}
+
+// NEW: returns to the gallery view (used by back-zone tap + hardware/gesture back)
+function showGallery() {
+    swiperEl.style.display = 'none';
+    gallery.style.display = '';
+    magicModeActive = false;
+    indicator.classList.remove('active');
+    inputBuffer = "";
+    forceCount = 0;
+}
+
+gallery.addEventListener('click', () => {
+    showList();
+});
+
+// NEW: tap top-left corner while list is open -> go back to gallery
+backZone.addEventListener('click', () => {
+    if (magicModeActive) return; // don't steal taps meant for magic-mode digit entry
+    if (gallery.style.display === 'none') {
+        history.back(); // triggers popstate below, which calls showGallery()
+    }
+});
+
+// NEW: hardware back button / swipe-back gesture support
+window.addEventListener('popstate', () => {
+    if (gallery.style.display === 'none') {
+        showGallery();
+    }
 });
 
 function handleFlip(event) {
@@ -293,4 +328,3 @@ if ('serviceWorker' in navigator) {
       .catch(err => console.log('Service Worker Failed', err));
   });
 }
-
