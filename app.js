@@ -1,7 +1,7 @@
 // 4. PERSISTENT MEMORY LOGIC
 const listKey = 'user_list_order';
 const forceKey = 'user_forced_indices_v2'; 
-const wordOrderKey = 'user_word_order'; // NEW: To remember the SWAP state
+const wordOrderKey = 'user_word_order';
 
 const master = [movieData, cardData, objectData, vacationData, songData, fifaData];
 
@@ -22,14 +22,12 @@ if (!savedNames) {
 }
 localStorage.setItem(listKey, JSON.stringify(allLists.map(l => l.title)));
 
-// --- NEW: LOAD SAVED WORD ORDER ---
 let savedWordOrders = JSON.parse(localStorage.getItem(wordOrderKey)) || {};
 allLists.forEach(list => {
     if (savedWordOrders[list.title]) {
         list.forceWords = savedWordOrders[list.title];
     }
 });
-// ----------------------------------
 
 const originalItems = allLists.map(list => [...list.items]);
 
@@ -44,7 +42,8 @@ const gallery = document.getElementById('gallery-overlay');
 const swiperEl = document.querySelector('.swiper');
 const indicator = document.getElementById('indicator');
 const settingsPage = document.getElementById('settings-page');
-const backZone = document.getElementById('back-zone'); // NEW
+const backZone = document.getElementById('back-zone');
+const pageIndicator = document.getElementById('page-indicator'); // NEW
 
 let swiperInstance;
 let magicModeActive = false; 
@@ -52,13 +51,16 @@ let inputBuffer = "";
 let forceCount = 0;
 let isUpsideDown = false; 
 
-// NEW: set the baseline history state so back-button/back-zone have somewhere to return to
+// NEW: swipe-sequence detector state
+let swipeSequence = [];
+let swipeSequenceTimer = null;
+
 history.replaceState({ view: 'gallery' }, '');
 
-// NEW: opens the list view (used by gallery tap)
 function showList() {
     gallery.style.display = 'none';
     swiperEl.style.display = 'block';
+    pageIndicator.style.display = 'block'; // NEW
     history.pushState({ view: 'list' }, '');
 
     if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
@@ -75,29 +77,28 @@ function showList() {
     initApp();
 }
 
-// NEW: returns to the gallery view (used by back-zone tap + hardware/gesture back)
 function showGallery() {
     swiperEl.style.display = 'none';
     gallery.style.display = '';
+    pageIndicator.style.display = 'none'; // NEW
     magicModeActive = false;
     indicator.classList.remove('active');
     inputBuffer = "";
     forceCount = 0;
+    resetSwipeSequence(); // NEW
 }
 
 gallery.addEventListener('click', () => {
     showList();
 });
 
-// NEW: tap top-left corner while list is open -> go back to gallery
 backZone.addEventListener('click', () => {
-    if (magicModeActive) return; // don't steal taps meant for magic-mode digit entry
+    if (magicModeActive) return;
     if (gallery.style.display === 'none') {
-        history.back(); // triggers popstate below, which calls showGallery()
+        history.back();
     }
 });
 
-// NEW: hardware back button / swipe-back gesture support
 window.addEventListener('popstate', () => {
     if (gallery.style.display === 'none') {
         showGallery();
@@ -118,7 +119,8 @@ function toggleMagicMode() {
     magicModeActive = !magicModeActive;
     inputBuffer = "";
     forceCount = 0; 
-    
+    resetSwipeSequence(); // NEW: don't let a stale sequence linger once mode changes
+
     if (magicModeActive) {
         indicator.classList.add('active');
         if (navigator.vibrate) navigator.vibrate(60);
@@ -126,6 +128,53 @@ function toggleMagicMode() {
         indicator.classList.remove('active');
         if (navigator.vibrate) navigator.vibrate([30, 30]);
     }
+}
+
+// NEW: reset the swipe-sequence buffer + pending timer
+function resetSwipeSequence() {
+    swipeSequence = [];
+    if (swipeSequenceTimer) {
+        clearTimeout(swipeSequenceTimer);
+        swipeSequenceTimer = null;
+    }
+}
+
+// NEW: called on every swipe with 'left' or 'right'
+// direction convention: 'left' = swiped to next slide, 'right' = swiped to previous slide
+function handleSwipeDirection(direction) {
+    if (gallery.style.display === 'none' && !magicModeActive) {
+        swipeSequence.push(direction);
+        if (swipeSequence.length > 4) {
+            swipeSequence = swipeSequence.slice(-4);
+        }
+
+        if (swipeSequenceTimer) {
+            clearTimeout(swipeSequenceTimer);
+            swipeSequenceTimer = null;
+        }
+
+        const seq = swipeSequence;
+        const isLeftPattern = seq.length === 4 &&
+            seq[0] === 'left' && seq[1] === 'left' && seq[2] === 'left' && seq[3] === 'right';
+        const isRightPattern = seq.length === 4 &&
+            seq[0] === 'right' && seq[1] === 'right' && seq[2] === 'right' && seq[3] === 'left';
+
+        if (isLeftPattern || isRightPattern) {
+            swipeSequenceTimer = setTimeout(() => {
+                if (!magicModeActive) {
+                    toggleMagicMode();
+                }
+            }, 5000);
+        }
+    }
+}
+
+// NEW: keeps the top-right "x/y" indicator in sync with the active slide
+function updatePageIndicator() {
+    if (!swiperInstance) return;
+    const current = swiperInstance.realIndex + 1;
+    const total = allLists.length;
+    pageIndicator.innerText = `${current}/${total}`;
 }
 
 function initApp() {
@@ -166,8 +215,22 @@ function initApp() {
         followFinger: true,     
         touchMoveStopPropagation: true, 
         slidesPerGroup: 1,      
-        touchReleaseOnEdges: true
+        touchReleaseOnEdges: true,
+        on: {
+            // NEW: fire on every real swipe/slide transition
+            slideNextTransitionStart: function () {
+                handleSwipeDirection('left');
+            },
+            slidePrevTransitionStart: function () {
+                handleSwipeDirection('right');
+            },
+            slideChangeTransitionEnd: function () {
+                updatePageIndicator();
+            }
+        }
     });
+
+    updatePageIndicator(); // NEW: set initial 1/N on load
 }
 
 document.addEventListener('touchstart', (e) => {
