@@ -29,7 +29,7 @@
             width: 100%;
         }
 
-        /* NEW: top-left back tap zone (active only while list view is open) */
+        /* top-left back tap zone (active only while list view is open) */
         .back-zone {
             position: fixed;
             top: 0;
@@ -38,6 +38,20 @@
             height: 100px;
             z-index: 9999;
             /* background: rgba(255,0,0,0.15); */ /* uncomment to visualize while testing */
+        }
+
+        /* NEW: subtle page indicator, top-right, 10px above the list content area */
+        .page-indicator {
+            position: fixed;
+            top: 10px;
+            right: 16px;
+            z-index: 500;
+            color: rgba(255, 255, 255, 0.45);
+            font-size: 11px;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            letter-spacing: 0.5px;
+            pointer-events: none;
+            display: none; /* shown only while list view is active */
         }
     </style>
 
@@ -56,7 +70,10 @@
 
     <div id="indicator" class="indicator"></div>
 
-    <!-- NEW: back tap zone -->
+    <!-- NEW: page count indicator, e.g. 1/6 -->
+    <div id="page-indicator" class="page-indicator"></div>
+
+    <!-- back tap zone -->
     <div id="back-zone" class="back-zone"></div>
 
     <div id="settings-page" class="settings-page">
@@ -72,7 +89,7 @@
     <script src="song.js?v=1"></script>
     <script src="fifa.js?v=1"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-    <script src="app.js?v=4"></script>
+    <script src="app.js?v=5"></script>
 
     <script>
         if ('serviceWorker' in navigator) {
@@ -80,12 +97,10 @@
                 navigator.serviceWorker.register('./sw.js')
                     .then(reg => {
                         console.log('SW Registered');
-                        // Check for updates automatically
                         reg.onupdatefound = () => {
                             const installingWorker = reg.installing;
                             installingWorker.onstatechange = () => {
                                 if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                    // New content available, refresh to activate
                                     window.location.reload();
                                 }
                             };
