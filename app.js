@@ -175,7 +175,17 @@ function updatePageIndicator() {
     const current = swiperInstance.realIndex + 1;
     const total = allLists.length;
     pageIndicator.innerText = `${current}/${total}`;
+
+    // NEW: position it 20px above wherever the actual content box starts
+    const activeWrapper = document.querySelector('.swiper-slide-active .content-wrapper');
+    if (activeWrapper) {
+        const rect = activeWrapper.getBoundingClientRect();
+        pageIndicator.style.top = (rect.top - 20) + 'px';
+    }
 }
+
+// NEW: keep it aligned if the layout shifts (rotation, resize, etc.)
+window.addEventListener('resize', updatePageIndicator);
 
 function initApp() {
     allLists.forEach((list) => {
