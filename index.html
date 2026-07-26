@@ -41,9 +41,9 @@
         }
 
         /* NEW: subtle page indicator, top-right, 10px above the list content area */
-     .page-indicator {
+    .page-indicator {
     position: fixed;
-    top: calc(env(safe-area-inset-top, 0px) + 40px); /* CHANGED from 10px */
+    top: 0; /* CHANGED: set dynamically in JS now */
     right: 16px;
     z-index: 500;
     color: rgba(255, 255, 255, 0.45);
@@ -52,7 +52,7 @@
     letter-spacing: 0.5px;
     pointer-events: none;
     display: none;
-     }
+    }
     </style>
 
     <link rel="stylesheet" href="style.css?v=3">
