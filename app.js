@@ -43,7 +43,7 @@ const swiperEl = document.querySelector('.swiper');
 const indicator = document.getElementById('indicator');
 const settingsPage = document.getElementById('settings-page');
 const backZone = document.getElementById('back-zone');
-const pageIndicator = document.getElementById('page-indicator'); // NEW
+const pageIndicator = document.getElementById('page-indicator');
 
 let swiperInstance;
 let magicModeActive = false; 
@@ -51,7 +51,6 @@ let inputBuffer = "";
 let forceCount = 0;
 let isUpsideDown = false; 
 
-// NEW: swipe-sequence detector state
 let swipeSequence = [];
 let swipeSequenceTimer = null;
 
@@ -60,7 +59,7 @@ history.replaceState({ view: 'gallery' }, '');
 function showList() {
     gallery.style.display = 'none';
     swiperEl.style.display = 'block';
-    pageIndicator.style.display = 'block'; // NEW
+    pageIndicator.style.display = 'block';
     history.pushState({ view: 'list' }, '');
 
     if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
@@ -80,12 +79,12 @@ function showList() {
 function showGallery() {
     swiperEl.style.display = 'none';
     gallery.style.display = '';
-    pageIndicator.style.display = 'none'; // NEW
+    pageIndicator.style.display = 'none';
     magicModeActive = false;
     indicator.classList.remove('active');
     inputBuffer = "";
     forceCount = 0;
-    resetSwipeSequence(); // NEW
+    resetSwipeSequence();
 }
 
 gallery.addEventListener('click', () => {
@@ -119,7 +118,7 @@ function toggleMagicMode() {
     magicModeActive = !magicModeActive;
     inputBuffer = "";
     forceCount = 0; 
-    resetSwipeSequence(); // NEW: don't let a stale sequence linger once mode changes
+    resetSwipeSequence();
 
     if (magicModeActive) {
         indicator.classList.add('active');
@@ -130,7 +129,6 @@ function toggleMagicMode() {
     }
 }
 
-// NEW: reset the swipe-sequence buffer + pending timer
 function resetSwipeSequence() {
     swipeSequence = [];
     if (swipeSequenceTimer) {
@@ -139,8 +137,6 @@ function resetSwipeSequence() {
     }
 }
 
-// NEW: called on every swipe with 'left' or 'right'
-// direction convention: 'left' = swiped to next slide, 'right' = swiped to previous slide
 function handleSwipeDirection(direction) {
     if (gallery.style.display === 'none' && !magicModeActive) {
         swipeSequence.push(direction);
@@ -169,14 +165,12 @@ function handleSwipeDirection(direction) {
     }
 }
 
-// NEW: keeps the top-right "x/y" indicator in sync with the active slide
 function updatePageIndicator() {
     if (!swiperInstance) return;
     const current = swiperInstance.realIndex + 1;
     const total = allLists.length;
     pageIndicator.innerText = `${current}/${total}`;
 
-    // NEW: position it 20px above wherever the actual content box starts
     const activeWrapper = document.querySelector('.swiper-slide-active .content-wrapper');
     if (activeWrapper) {
         const rect = activeWrapper.getBoundingClientRect();
@@ -184,7 +178,6 @@ function updatePageIndicator() {
     }
 }
 
-// NEW: keep it aligned if the layout shifts (rotation, resize, etc.)
 window.addEventListener('resize', updatePageIndicator);
 
 function initApp() {
@@ -227,7 +220,6 @@ function initApp() {
         slidesPerGroup: 1,      
         touchReleaseOnEdges: true,
         on: {
-            // NEW: fire on every real swipe/slide transition
             slideNextTransitionStart: function () {
                 handleSwipeDirection('left');
             },
@@ -240,7 +232,7 @@ function initApp() {
         }
     });
 
-    updatePageIndicator(); // NEW: set initial 1/N on load
+    updatePageIndicator();
 }
 
 document.addEventListener('touchstart', (e) => {
@@ -297,12 +289,12 @@ function getGridDigit(x, y, w, h) {
 }
 
 function applyGlobalForce(position, excludedIdx) {
-    const targetIdx = Math.min(Math.max(position - 1, 0), 49);
-
     allLists.forEach((list, i) => {
         if (i === excludedIdx) return;
 
         const listOriginals = originalItems[i];
+        const maxIdx = listOriginals.length - 1; // NEW: per-list cap instead of hardcoded 49
+        const targetIdx = Math.min(Math.max(position - 1, 0), maxIdx);
 
         if (forcedIndicesMap[list.title][forceCount] !== null) {
             const oldIdx = forcedIndicesMap[list.title][forceCount];
